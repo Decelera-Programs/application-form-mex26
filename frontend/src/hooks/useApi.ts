@@ -1,6 +1,6 @@
-import type { ApplicationSession, FlowStep } from '../../../shared/types';
+import type { ApplicationSession, FlowStep } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
+const API_BASE = '/api';
 
 export interface SessionStart {
   session: ApplicationSession;
