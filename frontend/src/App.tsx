@@ -52,7 +52,7 @@ export default function App() {
               const data = await res.json();
               if (data.session.status === 'completed') {
                 setAppState('complete');
-                setCompletionMessage('You already completed this application. We'll be in touch!');
+                setCompletionMessage("You already completed this application. We'll be in touch!");
                 return;
               }
               setSession(data.session);
