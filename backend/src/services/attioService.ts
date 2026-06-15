@@ -2,16 +2,15 @@
  * Attio sync service — LATAM Deal Flow
  *
  * Flow on completion:
- *   1. Upsert Person (match by email — safe)
- *   2. Find or create Company (safe domain lookup FIRST, no blind upsert)
+ *   1. Upsert Person (match by email)
+ *   2. Upsert Company (match by domain if available, else plain create)
  *   3. Create Deal linked to Company + Person
  *   4. Add Deal to "Startups Deal Flow LATAM" list (slug: startups_deal_flow_2)
  *
  * Company domain strategy:
- *   - If startup has a website → extract domain → search Attio for existing company
- *   - If found → reuse that record ID (never upsert by domain again)
- *   - If not found → create new company WITH domain
- *   - If no website → create company WITHOUT domain (name-only, avoids domain conflicts)
+ *   - Has domain → PUT with matching_attribute=domains (upsert): creates or merges.
+ *     Attio enforces domain uniqueness so there is always at most one company per domain.
+ *   - No domain → POST create (name-only, no uniqueness constraint).
  */
 
 const ATTIO_API = 'https://api.attio.com/v2';
@@ -94,7 +93,7 @@ async function upsertPerson(input: PersonInput): Promise<AttioResult<{ id: strin
   return { ok: true, data: { id: result.data.data.id.record_id } };
 }
 
-// ---- Step 2: Company (safe domain handling) ----
+// ---- Step 2: Company ----
 
 export interface CompanyInput {
   name: string;
@@ -103,76 +102,48 @@ export interface CompanyInput {
 }
 
 /**
- * Search Attio for a company by domain. Returns record_id if found, null if not.
- * This is the safe lookup BEFORE any create/upsert.
- */
-async function findCompanyByDomain(domain: string): Promise<AttioResult<string | null>> {
-  const result = await attioFetch<{ data: { id: { record_id: string } }[] }>(
-    '/objects/companies/records/query',
-    {
-      method: 'POST',
-      body: JSON.stringify({
-        filter: {
-          domains: { $eq: domain },
-        },
-        limit: 1,
-      }),
-    }
-  );
-
-  if (!result.ok) return result;
-  const records = result.data.data;
-  if (records.length === 0) return { ok: true, data: null };
-  return { ok: true, data: records[0].id.record_id };
-}
-
-/**
- * Create a brand new company record. Used when no existing record was found.
- */
-async function createCompany(input: CompanyInput, domain: string | null): Promise<AttioResult<{ id: string }>> {
-  const values: Record<string, unknown> = {
-    name: [{ value: input.name }],
-    ...(input.description ? { description: [{ value: input.description }] } : {}),
-    // Only include domains if we have one — avoids blank domain conflicts
-    ...(domain ? { domains: [{ domain }] } : {}),
-  };
-
-  const result = await attioFetch<{ data: { id: { record_id: string } } }>(
-    '/objects/companies/records',
-    {
-      method: 'POST',
-      body: JSON.stringify({ data: { values } }),
-    }
-  );
-
-  if (!result.ok) return result;
-  return { ok: true, data: { id: result.data.data.id.record_id } };
-}
-
-/**
- * Main company resolver:
- *   - Has domain → search first → reuse if found, create if not
- *   - No domain → always create (name-only, no domain conflicts possible)
+ * Company strategy:
+ *   - Has domain → upsert by domain (matching_attribute=domains). Attio enforces
+ *     domain uniqueness, so this safely creates or merges with the existing record.
+ *   - No domain → plain POST create (no uniqueness constraint to worry about).
  */
 async function resolveCompany(input: CompanyInput): Promise<AttioResult<{ id: string; existed: boolean }>> {
   const domain = input.website ? extractDomain(input.website) : null;
 
   if (domain) {
-    // Safe lookup first
-    const lookup = await findCompanyByDomain(domain);
-    if (!lookup.ok) return lookup;
-
-    if (lookup.data) {
-      // Company already exists — reuse, don't touch domains
-      console.log(`[Attio] Company found by domain ${domain}: ${lookup.data}`);
-      return { ok: true, data: { id: lookup.data, existed: true } };
-    }
+    const values: Record<string, unknown> = {
+      name: [{ value: input.name }],
+      domains: [{ domain }],
+      ...(input.description ? { description: [{ value: input.description }] } : {}),
+    };
+    const result = await attioFetch<{ data: { id: { record_id: string } } }>(
+      '/objects/companies/records?matching_attribute=domains',
+      {
+        method: 'PUT',
+        body: JSON.stringify({ data: { values } }),
+      }
+    );
+    if (!result.ok) return result;
+    return { ok: true, data: { id: result.data.data.id.record_id, existed: false } };
   }
 
-  // Not found or no domain → create fresh
-  const created = await createCompany(input, domain);
-  if (!created.ok) return created;
-  return { ok: true, data: { id: created.data.id, existed: false } };
+  // No domain → create name-only record
+  const result = await attioFetch<{ data: { id: { record_id: string } } }>(
+    '/objects/companies/records',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        data: {
+          values: {
+            name: [{ value: input.name }],
+            ...(input.description ? { description: [{ value: input.description }] } : {}),
+          },
+        },
+      }),
+    }
+  );
+  if (!result.ok) return result;
+  return { ok: true, data: { id: result.data.data.id.record_id, existed: false } };
 }
 
 // ---- Step 3: Deal ----
