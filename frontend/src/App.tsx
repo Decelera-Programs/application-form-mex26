@@ -241,8 +241,7 @@ export default function App() {
       {appState === 'chat' && currentStep && (
         <div style={{
           padding: '8px 12px 16px',
-          background: '#fff',
-          boxShadow: '0 -1px 6px rgba(45,56,82,0.06)',
+          borderTop: '1px solid rgba(45,56,82,0.07)',
           flexShrink: 0,
         }}>
           <StepInput

@@ -10,24 +10,32 @@ interface InputProps {
 const inputBase: React.CSSProperties = {
   width: '100%',
   padding: '11px 18px',
-  border: 'none',
+  border: '1.5px solid rgba(45,56,82,0.12)',
   borderRadius: 999,
   fontSize: 15,
   fontFamily: 'var(--font-body)',
   color: 'var(--color-night)',
-  background: '#F8F8F8',
+  background: '#fff',
   outline: 'none',
   boxSizing: 'border-box',
 };
+
+function SendIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="22" y1="2" x2="11" y2="13" />
+      <polygon points="22 2 15 22 11 13 2 9 22 2" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
 
 const sendBtn: React.CSSProperties = {
   width: 44,
   height: 44,
   borderRadius: '50%',
-  background: 'var(--color-sea)',
+  background: 'var(--color-night)',
   color: '#fff',
   border: 'none',
-  fontSize: 20,
   cursor: 'pointer',
   flexShrink: 0,
   display: 'flex',
@@ -73,7 +81,7 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
         disabled={disabled}
         style={{
           padding: '12px 28px',
-          background: 'var(--color-sea)',
+          background: 'var(--color-night)',
           color: '#fff',
           border: 'none',
           borderRadius: 999,
@@ -99,16 +107,24 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
             onClick={() => onSubmit(opt === 'Sí')}
             style={{
               flex: 1, padding: '12px 0',
-              border: 'none',
+              border: '1.5px solid rgba(45,56,82,0.12)',
               borderRadius: 999, fontSize: 15,
               fontFamily: 'var(--font-body)',
-              background: '#F8F8F8',
+              background: '#fff',
               color: 'var(--color-night)',
               cursor: 'pointer',
-              transition: 'background 0.15s',
+              transition: 'background 0.15s, border-color 0.15s',
             }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-water)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#F8F8F8'; }}
+            onMouseEnter={(e) => {
+              const b = e.currentTarget as HTMLButtonElement;
+              b.style.background = 'var(--color-water)';
+              b.style.borderColor = 'var(--color-water)';
+            }}
+            onMouseLeave={(e) => {
+              const b = e.currentTarget as HTMLButtonElement;
+              b.style.background = '#fff';
+              b.style.borderColor = 'rgba(45,56,82,0.12)';
+            }}
           >
             {opt}
           </button>
@@ -128,14 +144,22 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
             onClick={() => onSubmit(opt)}
             style={{
               width: '100%', padding: '11px 20px',
-              border: 'none',
+              border: '1.5px solid rgba(45,56,82,0.12)',
               borderRadius: 999, textAlign: 'left',
               fontSize: 15, fontFamily: 'var(--font-body)',
-              background: '#F8F8F8', color: 'var(--color-night)',
-              cursor: 'pointer', transition: 'background 0.15s',
+              background: '#fff', color: 'var(--color-night)',
+              cursor: 'pointer', transition: 'background 0.15s, border-color 0.15s',
             }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-water)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#F8F8F8'; }}
+            onMouseEnter={(e) => {
+              const b = e.currentTarget as HTMLButtonElement;
+              b.style.background = 'var(--color-water)';
+              b.style.borderColor = 'var(--color-water)';
+            }}
+            onMouseLeave={(e) => {
+              const b = e.currentTarget as HTMLButtonElement;
+              b.style.background = '#fff';
+              b.style.borderColor = 'rgba(45,56,82,0.12)';
+            }}
           >
             {opt}
           </button>
@@ -163,11 +187,11 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
                 onClick={() => toggle(opt)}
                 style={{
                   padding: '8px 16px',
-                  border: 'none',
+                  border: `1.5px solid ${isSelected ? 'var(--color-night)' : 'rgba(45,56,82,0.12)'}`,
                   borderRadius: 999,
                   fontSize: 14,
                   fontFamily: 'var(--font-body)',
-                  background: isSelected ? 'var(--color-sea)' : '#F8F8F8',
+                  background: isSelected ? 'var(--color-night)' : '#fff',
                   color: isSelected ? '#fff' : 'var(--color-night)',
                   cursor: 'pointer',
                   transition: 'all 0.15s',
@@ -183,7 +207,7 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
           disabled={disabled || (step.required ? selected.length === 0 : false)}
           onClick={handleSubmit}
           style={{
-            padding: '12px 28px', background: 'var(--color-sea)',
+            padding: '12px 28px', background: 'var(--color-night)',
             color: '#fff', border: 'none', borderRadius: 999,
             fontSize: 15, fontFamily: 'var(--font-body)', cursor: 'pointer',
           }}
@@ -226,14 +250,14 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
             onClick={handleSubmit}
             style={sendBtn}
           >
-            →
+            <SendIcon />
           </button>
         </div>
       </div>
     );
   }
 
-  // ---- Text / email / url / number — pill + circular button ----
+  // ---- Text / email / url / number ----
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
       <input
@@ -245,13 +269,15 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
         placeholder={step.placeholder}
         disabled={disabled}
         style={{ ...inputBase, flex: 1 }}
+        onFocus={(e) => (e.target.style.borderColor = 'var(--color-night)')}
+        onBlur={(e) => (e.target.style.borderColor = 'rgba(45,56,82,0.12)')}
       />
       <button
         disabled={disabled || (step.required ? !value.trim() : false)}
         onClick={handleSubmit}
         style={sendBtn}
       >
-        →
+        <SendIcon />
       </button>
     </div>
   );
