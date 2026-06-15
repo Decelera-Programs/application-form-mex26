@@ -1,0 +1,132 @@
+{
+  "id": "decelera-latam-application-v1",
+  "version": "1.0.0",
+  "title": "Apply to Decelera — LATAM",
+  "welcomeMessage": "Hola 👋\n\nBienvenido al proceso de aplicación de Decelera Ventures.\n\nSon unas pocas preguntas — responde con honestidad, no hay respuestas perfectas.\n\n¿Empezamos?",
+  "completionMessage": "¡Listo! 🙌\n\nHemos recibido tu aplicación. La revisamos personalmente y te escribimos en las próximas 2 semanas.\n\nBreath. Focus. Grow.",
+  "startStep": "founder_name",
+  "steps": {
+    "founder_name": {
+      "id": "founder_name",
+      "type": "text",
+      "question": "¿Cuál es tu nombre completo?",
+      "placeholder": "Tu nombre completo",
+      "required": true,
+      "nextStep": "founder_email",
+      "attioField": "name",
+      "attioObject": "people"
+    },
+    "founder_email": {
+      "id": "founder_email",
+      "type": "email",
+      "question": "¿Cuál es tu email?",
+      "placeholder": "tu@startup.com",
+      "required": true,
+      "nextStep": "founder_linkedin",
+      "attioField": "email_addresses",
+      "attioObject": "people"
+    },
+    "founder_linkedin": {
+      "id": "founder_linkedin",
+      "type": "url",
+      "question": "¿Tu LinkedIn?",
+      "placeholder": "https://linkedin.com/in/tunombre",
+      "required": false,
+      "nextStep": "startup_name",
+      "attioField": "linkedin_1",
+      "attioObject": "deals"
+    },
+    "startup_name": {
+      "id": "startup_name",
+      "type": "text",
+      "question": "¿Cómo se llama tu startup?",
+      "placeholder": "Nombre de la startup",
+      "required": true,
+      "nextStep": "startup_website",
+      "attioField": "name",
+      "attioObject": "companies"
+    },
+    "startup_website": {
+      "id": "startup_website",
+      "type": "url",
+      "question": "¿Tenéis web o landing page?",
+      "placeholder": "https://tustartup.com",
+      "required": false,
+      "nextStep": "startup_sector",
+      "attioField": "domains",
+      "attioObject": "companies"
+    },
+    "startup_sector": {
+      "id": "startup_sector",
+      "type": "select",
+      "question": "¿En qué sector opera {{startup_name}}?",
+      "required": true,
+      "options": [
+        "HealthTech",
+        "FinTech",
+        "EdTech",
+        "ClimateTech",
+        "DeepTech",
+        "B2B SaaS",
+        "Marketplace",
+        "FoodTech",
+        "Other"
+      ],
+      "nextStep": "number_of_founders",
+      "attioField": "sector",
+      "attioObject": "deals"
+    },
+    "number_of_founders": {
+      "id": "number_of_founders",
+      "type": "select",
+      "question": "¿Cuántos founders a tiempo completo sois?",
+      "required": true,
+      "options": ["1", "2", "3", "4", "4+"],
+      "nextStep": "technical_cofounder",
+      "attioField": "number_of_founders",
+      "attioObject": "deals"
+    },
+    "technical_cofounder": {
+      "id": "technical_cofounder",
+      "type": "boolean",
+      "question": "¿Tenéis co-founder técnico?",
+      "required": true,
+      "nextStep": "the_secret",
+      "attioField": "full_time_cto",
+      "attioObject": "deals"
+    },
+    "the_secret": {
+      "id": "the_secret",
+      "type": "textarea",
+      "question": "Dinos algo que sepas sobre tu industria que los grandes incumbentes no entienden o ignoran.\n\n(Máx. 280 caracteres)",
+      "placeholder": "El insight que nadie más tiene...",
+      "required": true,
+      "nextStep": "how_did_you_find_us",
+      "attioField": "the_secret",
+      "attioObject": "deals"
+    },
+    "how_did_you_find_us": {
+      "id": "how_did_you_find_us",
+      "type": "select",
+      "question": "¿Cómo nos encontrasteis?",
+      "required": true,
+      "options": [
+        "Referral",
+        "LinkedIn",
+        "Google",
+        "Event",
+        "Newsletter",
+        "Other"
+      ],
+      "nextStep": "completion_statement",
+      "attioField": "reference_3",
+      "attioObject": "deals"
+    },
+    "completion_statement": {
+      "id": "completion_statement",
+      "type": "statement",
+      "question": "Gracias por tu tiempo 🙏\n\nRevisamos cada aplicación personalmente. Pronto tendrás noticias nuestras.",
+      "nextStep": null
+    }
+  }
+}
