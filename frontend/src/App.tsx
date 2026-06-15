@@ -271,7 +271,7 @@ function Screen({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
       height: '100dvh', display: 'flex', flexDirection: 'column',
-      background: '#fff', maxWidth: 640,
+      background: '#F8F8F8', maxWidth: 640,
       margin: '0 auto',
     }}>
       {children}

@@ -24,7 +24,7 @@ style.textContent = `
   }
 
   html, body { height: 100%; overflow: hidden; }
-  body { font-family: var(--font-body); background: #ffffff; }
+  body { font-family: var(--font-body); background: #F8F8F8; }
   #root { height: 100%; }
 
   @keyframes fadeSlideIn {
