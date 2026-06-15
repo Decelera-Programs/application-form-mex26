@@ -191,21 +191,25 @@ export default function App() {
     <Screen>
       {/* Header */}
       <div style={{
-        padding: '12px 20px',
-        background: '#B9C1D4',
+        padding: '10px 16px',
+        background: '#fff',
         display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0,
+        boxShadow: '0 1px 4px rgba(45,56,82,0.08)',
+        zIndex: 1,
       }}>
         <img
           src="https://images.squarespace-cdn.com/content/v1/67811e8fe702fd5553c65249/c5500619-9712-4b9b-83ee-a697212735ae/Disen%CC%83o+sin+ti%CC%81tulo+%2840%29.png"
           alt="Decelera"
-          style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }}
+          style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
         />
-        <span style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: 13, color: 'var(--color-night)',
-        }}>
-          {appState === 'complete' ? 'Aplicación enviada' : 'Formulario de aplicación'}
-        </span>
+        <div>
+          <div style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 15, color: 'var(--color-night)', lineHeight: 1.3 }}>
+            Decelera Ventures
+          </div>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-cloud)', lineHeight: 1.3 }}>
+            {appState === 'complete' ? 'Aplicación enviada ✓' : 'Mexico 2026 · Aplicación'}
+          </div>
+        </div>
       </div>
 
       {/* Progress */}
@@ -236,8 +240,9 @@ export default function App() {
       {/* Input area */}
       {appState === 'chat' && currentStep && (
         <div style={{
-          padding: '12px 20px 20px',
-          borderTop: '1px solid var(--color-sky)',
+          padding: '8px 12px 16px',
+          background: '#fff',
+          boxShadow: '0 -1px 6px rgba(45,56,82,0.06)',
           flexShrink: 0,
         }}>
           <StepInput

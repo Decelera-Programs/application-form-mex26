@@ -9,16 +9,30 @@ interface InputProps {
 
 const inputBase: React.CSSProperties = {
   width: '100%',
-  padding: '12px 16px',
-  border: '2px solid var(--color-cloud)',
-  borderRadius: 14,
+  padding: '11px 18px',
+  border: 'none',
+  borderRadius: 999,
   fontSize: 15,
   fontFamily: 'var(--font-body)',
   color: 'var(--color-night)',
-  background: '#fff',
+  background: '#F8F8F8',
   outline: 'none',
-  transition: 'border-color 0.2s',
   boxSizing: 'border-box',
+};
+
+const sendBtn: React.CSSProperties = {
+  width: 44,
+  height: 44,
+  borderRadius: '50%',
+  background: 'var(--color-sea)',
+  color: '#fff',
+  border: 'none',
+  fontSize: 20,
+  cursor: 'pointer',
+  flexShrink: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 };
 
 export function StepInput({ step, onSubmit, disabled }: InputProps) {
@@ -62,7 +76,7 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
           background: 'var(--color-sea)',
           color: '#fff',
           border: 'none',
-          borderRadius: 10,
+          borderRadius: 999,
           fontSize: 15,
           fontFamily: 'var(--font-body)',
           cursor: 'pointer',
@@ -77,7 +91,7 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
   // ---- Boolean ----
   if (step.type === 'boolean') {
     return (
-      <div style={{ display: 'flex', gap: 12 }}>
+      <div style={{ display: 'flex', gap: 10 }}>
         {(['Sí', 'No'] as const).map((opt) => (
           <button
             key={opt}
@@ -85,14 +99,16 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
             onClick={() => onSubmit(opt === 'Sí')}
             style={{
               flex: 1, padding: '12px 0',
-              border: '2px solid var(--color-cloud)',
-              borderRadius: 10, fontSize: 15,
+              border: 'none',
+              borderRadius: 999, fontSize: 15,
               fontFamily: 'var(--font-body)',
-              background: '#fff',
+              background: '#F8F8F8',
               color: 'var(--color-night)',
               cursor: 'pointer',
-              transition: 'all 0.15s',
+              transition: 'background 0.15s',
             }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-water)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#F8F8F8'; }}
           >
             {opt}
           </button>
@@ -112,20 +128,14 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
             onClick={() => onSubmit(opt)}
             style={{
               width: '100%', padding: '11px 20px',
-              border: '2px solid var(--color-water)',
+              border: 'none',
               borderRadius: 999, textAlign: 'left',
               fontSize: 15, fontFamily: 'var(--font-body)',
-              background: 'var(--color-water)', color: 'var(--color-night)',
-              cursor: 'pointer', transition: 'all 0.15s',
+              background: '#F8F8F8', color: 'var(--color-night)',
+              cursor: 'pointer', transition: 'background 0.15s',
             }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = '#17b8d4';
-              (e.currentTarget as HTMLButtonElement).style.borderColor = '#17b8d4';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-water)';
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-water)';
-            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-water)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#F8F8F8'; }}
           >
             {opt}
           </button>
@@ -143,7 +153,7 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
     }
     return (
       <div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
           {step.options?.map((opt) => {
             const isSelected = selected.includes(opt);
             return (
@@ -153,12 +163,12 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
                 onClick={() => toggle(opt)}
                 style={{
                   padding: '8px 16px',
-                  border: `2px solid ${isSelected ? '#17b8d4' : 'var(--color-water)'}`,
+                  border: 'none',
                   borderRadius: 999,
                   fontSize: 14,
                   fontFamily: 'var(--font-body)',
-                  background: isSelected ? '#17b8d4' : 'var(--color-water)',
-                  color: 'var(--color-night)',
+                  background: isSelected ? 'var(--color-sea)' : '#F8F8F8',
+                  color: isSelected ? '#fff' : 'var(--color-night)',
                   cursor: 'pointer',
                   transition: 'all 0.15s',
                   flexShrink: 0,
@@ -174,7 +184,7 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
           onClick={handleSubmit}
           style={{
             padding: '12px 28px', background: 'var(--color-sea)',
-            color: '#fff', border: 'none', borderRadius: 10,
+            color: '#fff', border: 'none', borderRadius: 999,
             fontSize: 15, fontFamily: 'var(--font-body)', cursor: 'pointer',
           }}
         >
@@ -194,7 +204,7 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
       : 'var(--color-cloud)';
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <textarea
           ref={inputRef as React.RefObject<HTMLTextAreaElement>}
           value={value}
@@ -203,34 +213,29 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
           disabled={disabled}
           rows={4}
           maxLength={step.maxLength}
-          style={{ ...inputBase, resize: 'vertical', minHeight: 100 }}
+          style={{ ...inputBase, borderRadius: 18, resize: 'none', minHeight: 96 }}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {charsLeft !== null ? (
-            <span style={{ fontSize: 12, color: counterColor, fontFamily: 'var(--font-body)', transition: 'color 0.2s' }}>
+            <span style={{ fontSize: 12, color: counterColor, fontFamily: 'var(--font-body)', paddingLeft: 4, transition: 'color 0.2s' }}>
               {charsLeft} restantes
             </span>
           ) : <span />}
           <button
             disabled={disabled || (step.required ? !value.trim() : false)}
             onClick={handleSubmit}
-            style={{
-              padding: '11px 24px',
-              background: 'var(--color-sea)', color: '#fff',
-              border: 'none', borderRadius: 10, fontSize: 15,
-              fontFamily: 'var(--font-body)', cursor: 'pointer',
-            }}
+            style={sendBtn}
           >
-            Enviar →
+            →
           </button>
         </div>
       </div>
     );
   }
 
-  // ---- Text / email / url / number ----
+  // ---- Text / email / url / number — pill + circular button ----
   return (
-    <div style={{ display: 'flex', gap: 8 }}>
+    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
       <input
         ref={inputRef as React.RefObject<HTMLInputElement>}
         type={step.type === 'number' ? 'number' : step.type === 'email' ? 'email' : 'text'}
@@ -240,17 +245,11 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
         placeholder={step.placeholder}
         disabled={disabled}
         style={{ ...inputBase, flex: 1 }}
-        onFocus={(e) => (e.target.style.borderColor = 'var(--color-water)')}
-        onBlur={(e) => (e.target.style.borderColor = 'var(--color-cloud)')}
       />
       <button
         disabled={disabled || (step.required ? !value.trim() : false)}
         onClick={handleSubmit}
-        style={{
-          padding: '12px 20px', background: 'var(--color-sea)',
-          color: '#fff', border: 'none', borderRadius: 10,
-          fontSize: 20, cursor: 'pointer', flexShrink: 0,
-        }}
+        style={sendBtn}
       >
         →
       </button>
