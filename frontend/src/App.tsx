@@ -191,14 +191,18 @@ export default function App() {
     <Screen>
       {/* Header */}
       <div style={{
-        padding: '16px 20px 12px',
-        borderBottom: '1px solid var(--color-sky)',
+        padding: '12px 20px',
+        background: '#B9C1D4',
         display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0,
       }}>
-        <DeceleraLogo compact />
+        <img
+          src="https://images.squarespace-cdn.com/content/v1/67811e8fe702fd5553c65249/c5500619-9712-4b9b-83ee-a697212735ae/Disen%CC%83o+sin+ti%CC%81tulo+%2840%29.png"
+          alt="Decelera"
+          style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }}
+        />
         <span style={{
           fontFamily: 'var(--font-body)',
-          fontSize: 13, color: 'var(--color-cloud)',
+          fontSize: 13, color: 'var(--color-night)',
         }}>
           {appState === 'complete' ? 'Application submitted' : 'Application form'}
         </span>
