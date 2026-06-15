@@ -17,9 +17,9 @@
 const ATTIO_API = 'https://api.attio.com/v2';
 const ATTIO_TOKEN = process.env.ATTIO_API_KEY;
 
-// IDs from workspace exploration
 const LATAM_LIST_SLUG = 'startups_deal_flow_2';
 const DEAL_STAGE_LEADS_MEXICO = 'Leads Mexico 2026';
+const DEAL_OWNER_MEMBER_ID = '2f347934-032a-411c-a5ef-169cd635dd05'; // carlos@decelera.com
 
 // ---- Generic fetch wrapper ----
 
@@ -190,7 +190,8 @@ async function createDeal(input: DealInput): Promise<AttioResult<{ id: string }>
   const values: Record<string, unknown> = {
     // Required
     name: [{ value: String(a.startup_name ?? 'Unnamed startup') }],
-    stage: DEAL_STAGE_LEADS_MEXICO,
+    stage: [{ status: { title: DEAL_STAGE_LEADS_MEXICO } }],
+    owner: [{ workspace_member_id: DEAL_OWNER_MEMBER_ID }],
 
     // Relationships
     associated_company: [{ target_object: 'companies', target_record_id: input.companyId }],
@@ -228,7 +229,7 @@ async function createDeal(input: DealInput): Promise<AttioResult<{ id: string }>
   addNumber('constitution_year', a.constitution_year);
   addMultiSelect('sector', a.startup_sector);
   addMultiSelect('business_model', a.business_model);
-  addSelect('operations_location', a.operations_location);
+  addMultiSelect('operations_location', a.operations_location);
 
   // Problem / Product
   addText('problem', a.problem);
