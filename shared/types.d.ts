@@ -24,7 +24,7 @@ export interface FlowStep {
   placeholder?: string;
   required?: boolean;
   options?: string[];         // For select / multiselect
-  nextStep?: string;          // Default next step id (null = end)
+  nextStep?: string | null;   // Default next step id (null = end)
   conditions?: {              // Conditional branching
     if: FlowCondition;
     then: string;             // Step id to jump to
