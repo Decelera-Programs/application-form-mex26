@@ -206,6 +206,9 @@ async function createDeal(input: DealInput): Promise<AttioResult<{ id: string }>
   const addSelect = (slug: string, val: unknown) => {
     if (val) values[slug] = String(val);
   };
+  const addBool = (slug: string, val: unknown) => {
+    if (val !== undefined && val !== null) values[slug] = val ? 'Sí' : 'No';
+  };
   const addMultiSelect = (slug: string, val: unknown) => {
     if (Array.isArray(val) && val.length > 0) values[slug] = val.map(String);
     else if (val) values[slug] = [String(val)];
@@ -221,7 +224,7 @@ async function createDeal(input: DealInput): Promise<AttioResult<{ id: string }>
   addMultiSelect('collective_milestones', a.collective_milestones);
   addSelect('experience_in_sector', a.experience_in_sector);
   addText('relevant_experience_explanation', a.relevant_experience_explanation);
-  addSelect('full_time_cto', a.technical_cofounder);
+  addBool('full_time_cto', a.technical_cofounder);
 
   // Startup
   addText('deck_url', a.deck_url);
@@ -256,7 +259,7 @@ async function createDeal(input: DealInput): Promise<AttioResult<{ id: string }>
   addNumber('acv', a.acv);
   addNumber('potential_clients', a.potential_clients);
   addSelect('equity', a.equity);
-  addText('pre_money_valuation_7', a.pre_money_valuation);
+  addNumber('pre_money_valuation_7', a.pre_money_valuation);
 
   // Defensibility / Why now
   addMultiSelect('defensibility_4', a.defensibility);
