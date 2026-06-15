@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import path from 'path';
 import express from 'express';
 import cors from 'cors';
 import apiRouter from './routes/api';
@@ -32,6 +33,10 @@ app.get('/health', (_req, res) => {
 });
 
 app.use('/api', apiRouter);
+
+const frontendDist = path.join(__dirname, '../../frontend/dist');
+app.use(express.static(frontendDist));
+app.get('*', (_req, res) => res.sendFile(path.join(frontendDist, 'index.html')));
 
 app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
