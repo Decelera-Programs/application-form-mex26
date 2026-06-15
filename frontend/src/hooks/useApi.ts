@@ -1,4 +1,4 @@
-import type { ApplicationSession, FlowStep } from '../types';
+import type { ApplicationSession, FlowStep } from '../../../shared/types';
 
 const API_BASE = '/api';
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { FlowStep, ApplicationSession } from './types';
+import type { FlowStep, ApplicationSession } from '../../shared/types';
 import { startSession, submitAnswer } from './hooks/useApi';
 import { ChatBubble, TypingIndicator } from './components/ChatBubble';
 import { StepInput } from './components/StepInput';
