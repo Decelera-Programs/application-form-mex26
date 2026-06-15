@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { FlowStep, ApplicationSession } from '../../../shared/types';
+import type { FlowStep, ApplicationSession } from './types';
 import { startSession, submitAnswer } from './hooks/useApi';
 import { ChatBubble, TypingIndicator } from './components/ChatBubble';
 import { StepInput } from './components/StepInput';
@@ -23,7 +23,6 @@ export default function App() {
   const [totalSteps, setTotalSteps] = useState(10);
   const [stepIndex, setStepIndex] = useState(0);
   const [welcomeMessage, setWelcomeMessage] = useState('');
-  const [completionMessage, setCompletionMessage] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom on new messages
@@ -52,7 +51,6 @@ export default function App() {
               const data = await res.json();
               if (data.session.status === 'completed') {
                 setAppState('complete');
-                setCompletionMessage("You already completed this application. We'll be in touch!");
                 return;
               }
               setSession(data.session);
