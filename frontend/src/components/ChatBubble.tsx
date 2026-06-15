@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface ChatBubbleProps {
   message: string;
   type: 'bot' | 'user';
