@@ -3,10 +3,10 @@
 
 [build]
 builder = "NIXPACKS"
-buildCommand = "npm install && npm run build --workspace=frontend && npm run build --workspace=backend && node backend/dist/db/migrate.js"
+buildCommand = "npm install && npm run build --workspace=frontend && npm run build --workspace=backend"
 
 [deploy]
-startCommand = "npm run start"
+startCommand = "node backend/dist/db/migrate.js && npm run start"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
