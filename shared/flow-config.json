@@ -381,9 +381,10 @@
     "the_secret": {
       "id": "the_secret",
       "type": "textarea",
-      "question": "Dinos algo que sepas sobre tu industria que los grandes incumbentes no entienden o ignoran.\n\n(Máx. 280 caracteres)",
+      "question": "Dinos algo que sepas sobre tu industria que los grandes incumbentes no entienden o ignoran.",
       "placeholder": "El insight que nadie más tiene...",
       "required": true,
+      "maxLength": 280,
       "nextStep": "external_tailwind",
       "attioField": "the_secret",
       "attioObject": "deals"
@@ -411,9 +412,10 @@
     "why_now_validation": {
       "id": "why_now_validation",
       "type": "textarea",
-      "question": "¿Por qué ahora? ¿Qué ha cambiado para que {{startup_name}} pueda ganar donde otros no pudieron?\n\n(Máx. 280 caracteres)",
+      "question": "¿Por qué ahora? ¿Qué ha cambiado para que {{startup_name}} pueda ganar donde otros no pudieron?",
       "placeholder": "La ventana de oportunidad se abre porque...",
       "required": true,
+      "maxLength": 280,
       "nextStep": "potential_clients",
       "attioField": "why_now_validation",
       "attioObject": "deals"
@@ -444,9 +446,10 @@
     "icp": {
       "id": "icp",
       "type": "textarea",
-      "question": "Describe a tu cliente ideal (ICP). ¿Quién es, qué problema tiene y por qué os compra a vosotros?\n\n(Máx. 280 caracteres)",
+      "question": "Describe a tu cliente ideal (ICP). ¿Quién es, qué problema tiene y por qué os compra a vosotros?",
       "placeholder": "Nuestro cliente ideal es...",
       "required": true,
+      "maxLength": 280,
       "nextStep": "section_product",
       "attioField": "icp",
       "attioObject": "deals"
@@ -462,9 +465,10 @@
     "problem": {
       "id": "problem",
       "type": "textarea",
-      "question": "¿Cuál es el problema central que resuelve {{startup_name}}? Sé concreto.\n\n(Máx. 280 caracteres)",
+      "question": "¿Cuál es el problema central que resuelve {{startup_name}}? Sé concreto.",
       "placeholder": "El problema que resolvemos es...",
       "required": true,
+      "maxLength": 280,
       "nextStep": "demo_url",
       "attioField": "problem",
       "attioObject": "deals"
@@ -682,9 +686,10 @@
     "soul_of_the_project": {
       "id": "soul_of_the_project",
       "type": "textarea",
-      "question": "¿Cuál es el alma de {{startup_name}}? ¿Por qué existe, más allá del negocio?\n\n(Máx. 280 caracteres)",
+      "question": "¿Cuál es el alma de {{startup_name}}? ¿Por qué existe, más allá del negocio?",
       "placeholder": "Existimos porque...",
       "required": true,
+      "maxLength": 280,
       "nextStep": "how_did_you_find_us",
       "attioField": "soul_of_the_project",
       "attioObject": "deals"

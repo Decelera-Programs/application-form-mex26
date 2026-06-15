@@ -29,7 +29,6 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
   useEffect(() => {
     setValue('');
     setSelected([]);
-    // Small delay so the element is visible before focusing
     setTimeout(() => inputRef.current?.focus(), 300);
   }, [step.id]);
 
@@ -38,7 +37,6 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
       if (step.required && selected.length === 0) return;
       onSubmit(selected);
     } else if (step.type === 'boolean') {
-      // handled via buttons
       return;
     } else {
       if (step.required && !value.trim()) return;
@@ -53,6 +51,7 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
     }
   }
 
+  // ---- Statement ----
   if (step.type === 'statement') {
     return (
       <button
@@ -70,19 +69,20 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
           fontWeight: 500,
         }}
       >
-        Continue →
+        Continuar →
       </button>
     );
   }
 
+  // ---- Boolean ----
   if (step.type === 'boolean') {
     return (
       <div style={{ display: 'flex', gap: 12 }}>
-        {['Yes', 'No'].map((opt) => (
+        {(['Sí', 'No'] as const).map((opt) => (
           <button
             key={opt}
             disabled={disabled}
-            onClick={() => onSubmit(opt === 'Yes')}
+            onClick={() => onSubmit(opt === 'Sí')}
             style={{
               flex: 1, padding: '12px 0',
               border: '2px solid var(--color-cloud)',
@@ -101,6 +101,7 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
     );
   }
 
+  // ---- Select ----
   if (step.type === 'select') {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -133,6 +134,7 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
     );
   }
 
+  // ---- Multiselect — chip/wrap layout ----
   if (step.type === 'multiselect') {
     function toggle(opt: string) {
       setSelected((prev) =>
@@ -141,7 +143,7 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
     }
     return (
       <div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
           {step.options?.map((opt) => {
             const isSelected = selected.includes(opt);
             return (
@@ -150,13 +152,16 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
                 disabled={disabled}
                 onClick={() => toggle(opt)}
                 style={{
-                  width: '100%', padding: '11px 20px',
-                  border: `2px solid var(--color-water)`,
-                  borderRadius: 999, textAlign: 'left',
-                  fontSize: 15, fontFamily: 'var(--font-body)',
+                  padding: '8px 16px',
+                  border: `2px solid ${isSelected ? '#17b8d4' : 'var(--color-water)'}`,
+                  borderRadius: 999,
+                  fontSize: 14,
+                  fontFamily: 'var(--font-body)',
                   background: isSelected ? '#17b8d4' : 'var(--color-water)',
                   color: 'var(--color-night)',
                   cursor: 'pointer',
+                  transition: 'all 0.15s',
+                  flexShrink: 0,
                 }}
               >
                 {isSelected ? '✓ ' : ''}{opt}
@@ -173,15 +178,23 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
             fontSize: 15, fontFamily: 'var(--font-body)', cursor: 'pointer',
           }}
         >
-          Continue →
+          Continuar →
         </button>
       </div>
     );
   }
 
+  // ---- Textarea with character counter ----
   if (step.type === 'textarea') {
+    const charsLeft = step.maxLength !== undefined ? step.maxLength - value.length : null;
+    const counterColor =
+      charsLeft === null ? 'var(--color-cloud)'
+      : charsLeft <= 20 ? '#e53e3e'
+      : charsLeft <= 50 ? '#dd6b20'
+      : 'var(--color-cloud)';
+
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <textarea
           ref={inputRef as React.RefObject<HTMLTextAreaElement>}
           value={value}
@@ -189,25 +202,33 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
           placeholder={step.placeholder}
           disabled={disabled}
           rows={4}
+          maxLength={step.maxLength}
           style={{ ...inputBase, resize: 'vertical', minHeight: 100 }}
         />
-        <button
-          disabled={disabled || (step.required ? !value.trim() : false)}
-          onClick={handleSubmit}
-          style={{
-            alignSelf: 'flex-end', padding: '11px 24px',
-            background: 'var(--color-sea)', color: '#fff',
-            border: 'none', borderRadius: 10, fontSize: 15,
-            fontFamily: 'var(--font-body)', cursor: 'pointer',
-          }}
-        >
-          Send →
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {charsLeft !== null ? (
+            <span style={{ fontSize: 12, color: counterColor, fontFamily: 'var(--font-body)', transition: 'color 0.2s' }}>
+              {charsLeft} restantes
+            </span>
+          ) : <span />}
+          <button
+            disabled={disabled || (step.required ? !value.trim() : false)}
+            onClick={handleSubmit}
+            style={{
+              padding: '11px 24px',
+              background: 'var(--color-sea)', color: '#fff',
+              border: 'none', borderRadius: 10, fontSize: 15,
+              fontFamily: 'var(--font-body)', cursor: 'pointer',
+            }}
+          >
+            Enviar →
+          </button>
+        </div>
       </div>
     );
   }
 
-  // text, email, url, number
+  // ---- Text / email / url / number ----
   return (
     <div style={{ display: 'flex', gap: 8 }}>
       <input

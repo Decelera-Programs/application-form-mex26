@@ -25,6 +25,7 @@ export interface FlowStep {
   required?: boolean;
   options?: string[];         // For select / multiselect
   nextStep?: string | null;   // Default next step id (null = end)
+  maxLength?: number;          // Character limit (textarea only — drives live counter)
   conditions?: {              // Conditional branching
     if: FlowCondition;
     then: string;             // Step id to jump to

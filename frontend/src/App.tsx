@@ -130,7 +130,7 @@ export default function App() {
         addBotMessage(result.nextStep.question);
       }
     } catch {
-      addBotMessage('Something went wrong saving your answer. Please try again.');
+      addBotMessage('Algo salió mal guardando tu respuesta. Por favor, inténtalo de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
@@ -144,8 +144,8 @@ export default function App() {
     return (
       <Screen>
         <div style={{ textAlign: 'center', color: 'var(--color-cloud)', fontFamily: 'var(--font-body)' }}>
-          <p>Couldn't load the application form.</p>
-          <p style={{ fontSize: 13 }}>Please refresh the page or try again later.</p>
+          <p>No se pudo cargar el formulario.</p>
+          <p style={{ fontSize: 13 }}>Recarga la página o inténtalo más tarde.</p>
         </div>
       </Screen>
     );
@@ -180,7 +180,7 @@ export default function App() {
               cursor: 'pointer', letterSpacing: 0.3,
             }}
           >
-            Let's go →
+            Empezamos →
           </button>
         </div>
       </Screen>
@@ -204,7 +204,7 @@ export default function App() {
           fontFamily: 'var(--font-body)',
           fontSize: 13, color: 'var(--color-night)',
         }}>
-          {appState === 'complete' ? 'Application submitted' : 'Application form'}
+          {appState === 'complete' ? 'Aplicación enviada' : 'Formulario de aplicación'}
         </span>
       </div>
 
