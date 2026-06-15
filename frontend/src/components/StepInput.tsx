@@ -11,7 +11,7 @@ const inputBase: React.CSSProperties = {
   width: '100%',
   padding: '12px 16px',
   border: '2px solid var(--color-cloud)',
-  borderRadius: 10,
+  borderRadius: 14,
   fontSize: 15,
   fontFamily: 'var(--font-body)',
   color: 'var(--color-night)',
@@ -110,20 +110,20 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
             disabled={disabled}
             onClick={() => onSubmit(opt)}
             style={{
-              width: '100%', padding: '11px 16px',
-              border: '2px solid var(--color-cloud)',
-              borderRadius: 10, textAlign: 'left',
+              width: '100%', padding: '11px 20px',
+              border: '2px solid var(--color-water)',
+              borderRadius: 999, textAlign: 'left',
               fontSize: 15, fontFamily: 'var(--font-body)',
-              background: '#fff', color: 'var(--color-night)',
+              background: 'var(--color-water)', color: 'var(--color-night)',
               cursor: 'pointer', transition: 'all 0.15s',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-sea)';
-              (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-sky)';
+              (e.currentTarget as HTMLButtonElement).style.background = '#17b8d4';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = '#17b8d4';
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-cloud)';
-              (e.currentTarget as HTMLButtonElement).style.background = '#fff';
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--color-water)';
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--color-water)';
             }}
           >
             {opt}
@@ -150,11 +150,11 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
                 disabled={disabled}
                 onClick={() => toggle(opt)}
                 style={{
-                  width: '100%', padding: '11px 16px',
-                  border: `2px solid ${isSelected ? 'var(--color-sea)' : 'var(--color-cloud)'}`,
-                  borderRadius: 10, textAlign: 'left',
+                  width: '100%', padding: '11px 20px',
+                  border: `2px solid var(--color-water)`,
+                  borderRadius: 999, textAlign: 'left',
                   fontSize: 15, fontFamily: 'var(--font-body)',
-                  background: isSelected ? 'var(--color-sky)' : '#fff',
+                  background: isSelected ? '#17b8d4' : 'var(--color-water)',
                   color: 'var(--color-night)',
                   cursor: 'pointer',
                 }}
@@ -219,7 +219,7 @@ export function StepInput({ step, onSubmit, disabled }: InputProps) {
         placeholder={step.placeholder}
         disabled={disabled}
         style={{ ...inputBase, flex: 1 }}
-        onFocus={(e) => (e.target.style.borderColor = 'var(--color-sea)')}
+        onFocus={(e) => (e.target.style.borderColor = 'var(--color-water)')}
         onBlur={(e) => (e.target.style.borderColor = 'var(--color-cloud)')}
       />
       <button

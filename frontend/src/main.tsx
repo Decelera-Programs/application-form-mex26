@@ -8,19 +8,23 @@ style.textContent = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --color-sand:  #FAF3DC;
-    --color-sun:   #FFB950;
-    --color-water: #1FD0EF;
-    --color-sea:   #1158E5;
-    --color-night: #2D3852;
-    --color-cloud: #B9C1D4;
-    --color-sky:   #F2F8FA;
-    --font-title:  'Taviraj', serif;
-    --font-body:   'Fustat', sans-serif;
+    --color-sand:       #FAF3DC;
+    --color-sun:        #FFB950;
+    --color-water:      #1FD0EF;
+    --color-sea:        #1158E5;
+    --color-night:      #2D3852;
+    --color-cloud:      #B9C1D4;
+    --color-sky:        #F2F8FA;
+    --font-title:       'Taviraj', serif;
+    --font-body:        'Fustat', sans-serif;
+    --radius-bubble:    18px;
+    --radius-button:    999px;
+    --radius-input:     14px;
+    --radius-container: 20px;
   }
 
   html, body { height: 100%; overflow: hidden; }
-  body { font-family: var(--font-body); background: var(--color-sky); }
+  body { font-family: var(--font-body); background: #ffffff; }
   #root { height: 100%; }
 
   @keyframes fadeSlideIn {

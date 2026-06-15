@@ -93,7 +93,7 @@ export default function App() {
   async function handleWelcomeStart() {
     setAppState('chat');
     setIsTyping(true);
-    await delay(800);
+    await delay(typingDelay(currentStep?.question ?? ''));
     setIsTyping(false);
     if (currentStep) addBotMessage(currentStep.question);
   }
@@ -114,7 +114,7 @@ export default function App() {
 
       if (result.isComplete) {
         setIsTyping(true);
-        await delay(1000);
+        await delay(typingDelay(result.completionMessage ?? ''));
         setIsTyping(false);
         addBotMessage(result.completionMessage ?? '');
         setAppState('complete');
@@ -124,7 +124,7 @@ export default function App() {
 
       if (result.nextStep) {
         setIsTyping(true);
-        await delay(700);
+        await delay(typingDelay(result.nextStep.question));
         setIsTyping(false);
         setCurrentStep(result.nextStep);
         addBotMessage(result.nextStep.question);
@@ -316,4 +316,8 @@ function formatAnswerForDisplay(answer: unknown, step: FlowStep): string {
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function typingDelay(text: string) {
+  return Math.min((text.length / 580) * 1000, 2500);
 }
