@@ -75,12 +75,11 @@ export interface PersonInput {
 async function upsertPerson(input: PersonInput): Promise<AttioResult<{ id: string }>> {
   // Safe: email is the matching attribute for people — no domain conflict risk
   const result = await attioFetch<{ data: { id: { record_id: string } } }>(
-    '/objects/people/records',
+    '/objects/people/records?matching_attribute=email_addresses',
     {
       method: 'PUT',
       body: JSON.stringify({
         data: {
-          matching_attribute: 'email_addresses',
           values: {
             name: [{ first_name: input.fullName.split(' ')[0], last_name: input.fullName.split(' ').slice(1).join(' ') || '', full_name: input.fullName }],
             email_addresses: [{ email_address: input.email }],
