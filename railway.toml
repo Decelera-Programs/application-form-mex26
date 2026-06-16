@@ -3,7 +3,7 @@
 
 [build]
 builder = "NIXPACKS"
-buildCommand = "npm install && npm run build --workspace=frontend && npm run build --workspace=backend"
+buildCommand = "npm install --include=dev && npm run build --workspace=frontend && npm run build --workspace=backend"
 
 [deploy]
 startCommand = "node backend/dist/db/migrate.js && npm run start"
