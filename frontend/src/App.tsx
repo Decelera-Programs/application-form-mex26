@@ -31,9 +31,9 @@ const CORRECTION_SELECT_STEP: FlowStep = {
   required: true,
 };
 
-const INTRO_HTML = `Hi there! 👋 I'm the personal assistant to Carlota, Decelera's Dealflow Manager.<br>She's currently deep-diving into pitch decks and coffee, so she's asked me to help you with your application for <strong>Decelera Menorca 2026</strong> (May 22nd – 29th). 🏝️<br><br>Quick heads-up: we're a founder-first fund providing up to €1M in initial funding and a 7-day fully-sponsored residency to find our next startups. 🚀<br><br>Check our <a href="#" style="color:var(--color-sea);text-decoration:underline">FAQs</a> for details. Shall we start with the basics? It will just take a few minutes.<br><br>If at any point you submit the wrong answer, you'll have a chance to correct it at the end of the form.`;
+const INTRO_HTML = `Hi there! 👋 I'm the personal assistant to Carlota, Decelera's Dealflow Manager.<br>She's currently deep-diving into pitch decks and coffee, so she's asked me to help you with your application for <strong>Decelera Mexico 2026</strong> (May 22nd – 29th). 🏝️<br><br>Quick heads-up: we're a founder-first fund providing up to €1M in initial funding and a 7-day fully-sponsored residency to find our next startups. 🚀<br><br>Check our <a href="#" style="color:var(--color-sea);text-decoration:underline">FAQs</a> for details. Shall we start with the basics? It will just take a few minutes.<br><br>If at any point you submit the wrong answer, you'll have a chance to correct it at the end of the form.`;
 
-const GDPR_HTML = `First things first, a quick note on your data 🔒<br><br><strong>Data Protection</strong><br><br>The information provided in this form will be managed under the "Decelera Menorca 2026 Form" in compliance with GDPR and applicable European data protection laws. You have the right to access, correct, delete, or object to the processing of your data. For more details, visit our <a href="#" style="color:var(--color-sea);text-decoration:underline">Privacy Policy</a>.`;
+const GDPR_HTML = `First things first, a quick note on your data 🔒<br><br><strong>Data Protection</strong><br><br>The information provided in this form will be managed under the "Decelera Mexico 2026 Form" in compliance with GDPR and applicable European data protection laws. You have the right to access, correct, delete, or object to the processing of your data. For more details, visit our <a href="#" style="color:var(--color-sea);text-decoration:underline">Privacy Policy</a>.`;
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>('loading');
@@ -461,7 +461,7 @@ export default function App() {
             Decelera Ventures
           </div>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-cloud)', lineHeight: 1.3 }}>
-            {appState === 'complete' ? 'Aplicación enviada ✓' : 'Menorca 2026 · Aplicación'}
+            {appState === 'complete' ? 'Aplicación enviada ✓' : 'Mexico 2026 · Aplicación'}
           </div>
         </div>
         <div style={{ marginLeft: 'auto', marginRight: 6, display: 'flex', alignItems: 'center', gap: 14 }}>
