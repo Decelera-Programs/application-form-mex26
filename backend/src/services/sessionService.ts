@@ -103,13 +103,48 @@ export async function updateAttioIds(
 }
 
 /** Sessions that haven't been synced to Attio yet — for the retry worker */
-export async function getUnsyncedSessions(): Promise<ApplicationSession[]> {
+export async function getUnsyncedSessions(maxAttempts = 5): Promise<ApplicationSession[]> {
   const result = await pool.query(
     `SELECT * FROM application_sessions
      WHERE synced_to_attio = FALSE
        AND status = 'completed'
+       AND sync_attempts < $1
      ORDER BY created_at ASC
-     LIMIT 50`
+     LIMIT 50`,
+    [maxAttempts]
   );
   return result.rows.map(rowToSession);
+}
+
+export async function incrementSyncAttempts(sessionId: string): Promise<void> {
+  await pool.query(
+    `UPDATE application_sessions SET sync_attempts = sync_attempts + 1 WHERE id = $1`,
+    [sessionId]
+  );
+}
+
+export async function resetSession(sessionId: string, startStepId: string): Promise<void> {
+  await pool.query(
+    `UPDATE application_sessions
+     SET answers         = '{}'::jsonb,
+         current_step_id = $1,
+         status          = 'in_progress',
+         synced_to_attio = FALSE,
+         sync_attempts   = 0,
+         updated_at      = NOW()
+     WHERE id = $2`,
+    [startStepId, sessionId]
+  );
+}
+
+export async function patchSessionAnswer(sessionId: string, stepId: string, answer: unknown): Promise<void> {
+  await pool.query(
+    `UPDATE application_sessions
+     SET answers         = jsonb_set(answers, ARRAY[$1::text], $2::jsonb),
+         synced_to_attio = FALSE,
+         sync_attempts   = 0,
+         updated_at      = NOW()
+     WHERE id = $3`,
+    [stepId, JSON.stringify(answer), sessionId]
+  );
 }

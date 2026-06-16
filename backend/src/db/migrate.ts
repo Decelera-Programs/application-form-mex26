@@ -58,6 +58,8 @@ const migration = `
     BEFORE UPDATE ON attio_sync_queue
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+  ALTER TABLE application_sessions ADD COLUMN IF NOT EXISTS sync_attempts INTEGER NOT NULL DEFAULT 0;
+
   CREATE INDEX IF NOT EXISTS idx_sessions_status ON application_sessions(status);
   CREATE INDEX IF NOT EXISTS idx_sessions_synced ON application_sessions(synced_to_attio) WHERE synced_to_attio = FALSE;
   CREATE INDEX IF NOT EXISTS idx_queue_status ON attio_sync_queue(status) WHERE status IN ('pending', 'failed');

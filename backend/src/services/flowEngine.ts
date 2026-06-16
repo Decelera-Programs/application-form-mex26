@@ -1,5 +1,12 @@
 import type { FlowConfig, FlowStep, FlowCondition } from '../../../shared/types';
 
+export interface HistoryEntry {
+  stepId: string;
+  question: string;
+  answer: unknown;
+  type: string;
+}
+
 function evaluateCondition(
   condition: FlowCondition,
   answers: Record<string, unknown>
@@ -61,4 +68,35 @@ export function interpolateQuestion(
 
 export function getStep(flow: FlowConfig, stepId: string): FlowStep | null {
   return flow.steps[stepId] ?? null;
+}
+
+/**
+ * Reconstructs the ordered list of answered steps by replaying the flow
+ * from startStep, following the same conditional branching that was used
+ * when the user answered.
+ */
+export function buildHistory(
+  flow: FlowConfig,
+  answers: Record<string, unknown>
+): HistoryEntry[] {
+  const history: HistoryEntry[] = [];
+  let currentId: string | null = flow.startStep;
+  const visited = new Set<string>();
+
+  while (currentId && currentId in answers && !visited.has(currentId)) {
+    visited.add(currentId);
+    const step = flow.steps[currentId];
+    if (!step) break;
+
+    history.push({
+      stepId: currentId,
+      question: interpolateQuestion(step.question, answers),
+      answer: answers[currentId],
+      type: step.type,
+    });
+
+    currentId = resolveNextStep(step, answers);
+  }
+
+  return history;
 }

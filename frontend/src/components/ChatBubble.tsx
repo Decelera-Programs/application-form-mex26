@@ -1,10 +1,13 @@
+import React from 'react';
+
 interface ChatBubbleProps {
-  message: string;
+  message?: string;
+  children?: React.ReactNode;
   type: 'bot' | 'user';
   isNew?: boolean;
 }
 
-export function ChatBubble({ message, type, isNew = false }: ChatBubbleProps) {
+export function ChatBubble({ message, children, type, isNew = false }: ChatBubbleProps) {
   return (
     <div
       className={`bubble ${type} ${isNew ? 'bubble--new' : ''}`}
@@ -12,7 +15,7 @@ export function ChatBubble({ message, type, isNew = false }: ChatBubbleProps) {
         display: 'flex',
         justifyContent: type === 'user' ? 'flex-end' : 'flex-start',
         marginBottom: '12px',
-        animation: isNew ? 'fadeSlideIn 0.3s ease-out' : 'none',
+        animation: isNew ? 'fadeSlideIn 0.35s cubic-bezier(0.34, 1.4, 0.64, 1)' : 'none',
       }}
     >
       {type === 'bot' && (
@@ -42,7 +45,7 @@ export function ChatBubble({ message, type, isNew = false }: ChatBubbleProps) {
           boxShadow: type === 'bot' ? '0 1px 4px rgba(45,56,82,0.08)' : 'none',
         }}
       >
-        {message}
+        {children ?? message}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import type { FlowConfig } from '../../../shared/types';
-import { createSession, getSession, updateSessionAnswer, updateAttioIds } from '../services/sessionService';
-import { resolveNextStep, interpolateQuestion, getStep } from '../services/flowEngine';
+import { createSession, getSession, updateSessionAnswer, updateAttioIds, patchSessionAnswer, resetSession } from '../services/sessionService';
+import { resolveNextStep, interpolateQuestion, getStep, buildHistory } from '../services/flowEngine';
 import { syncSessionToAttio } from '../services/attioService';
 
 // Load flow config — in production you might load from DB or file system
@@ -47,7 +47,9 @@ router.get('/sessions/:id', async (req: Request, res: Response) => {
       question: interpolateQuestion(step.question, session.answers),
     };
 
-    res.json({ session, step: interpolated });
+    const history = buildHistory(flow, session.answers);
+
+    res.json({ session, step: interpolated, history });
   } catch (err) {
     console.error('GET /sessions/:id error:', err);
     res.status(500).json({ error: 'Failed to load session' });
@@ -121,6 +123,52 @@ router.post('/sessions/:id/answer', async (req: Request, res: Response) => {
     console.error('POST /sessions/:id/answer error:', err);
     res.status(500).json({ error: 'Failed to save answer' });
   }
+});
+
+/**
+ * POST /sessions/:id/reset
+ * Clears all answers and restarts the session from the first step.
+ */
+router.post('/sessions/:id/reset', async (req: Request, res: Response) => {
+  try {
+    const session = await getSession(req.params.id);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+    await resetSession(req.params.id, flow.startStep);
+    const firstStep = getStep(flow, flow.startStep);
+    res.json({ ok: true, step: firstStep });
+  } catch (err) {
+    console.error('POST /sessions/:id/reset error:', err);
+    res.status(500).json({ error: 'Failed to reset session' });
+  }
+});
+
+/**
+ * PATCH /sessions/:id/answer
+ * Overwrites a single answer in an existing session without advancing the flow.
+ * Resets synced_to_attio so the retry worker re-syncs with the corrected data.
+ */
+router.patch('/sessions/:id/answer', async (req: Request, res: Response) => {
+  try {
+    const { stepId, answer } = req.body as { stepId: string; answer: unknown };
+    const session = await getSession(req.params.id);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+    if (!stepId) return res.status(400).json({ error: 'stepId required' });
+    await patchSessionAnswer(req.params.id, stepId, answer);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('PATCH /sessions/:id/answer error:', err);
+    res.status(500).json({ error: 'Failed to update answer' });
+  }
+});
+
+/**
+ * GET /flow/steps/:stepId
+ * Returns a single step definition (used by the /correct flow to render the right input).
+ */
+router.get('/flow/steps/:stepId', (req: Request, res: Response) => {
+  const step = getStep(flow, req.params.stepId);
+  if (!step) return res.status(404).json({ error: 'Step not found' });
+  res.json(step);
 });
 
 /**

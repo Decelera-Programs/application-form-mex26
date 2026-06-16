@@ -40,3 +40,24 @@ export async function submitAnswer(
   if (!res.ok) throw new Error('Failed to submit answer');
   return res.json();
 }
+
+export async function correctAnswer(sessionId: string, stepId: string, answer: unknown): Promise<void> {
+  const res = await fetch(`${API_BASE}/sessions/${sessionId}/answer`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stepId, answer }),
+  });
+  if (!res.ok) throw new Error('Failed to correct answer');
+}
+
+export async function restartSession(sessionId: string): Promise<{ step: FlowStep }> {
+  const res = await fetch(`${API_BASE}/sessions/${sessionId}/reset`, { method: 'POST' });
+  if (!res.ok) throw new Error('Failed to reset session');
+  return res.json();
+}
+
+export async function getFlowStep(stepId: string): Promise<FlowStep> {
+  const res = await fetch(`${API_BASE}/flow/steps/${stepId}`);
+  if (!res.ok) throw new Error('Step not found');
+  return res.json();
+}

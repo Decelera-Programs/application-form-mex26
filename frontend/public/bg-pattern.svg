@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480">
+  <defs>
+    <symbol id="D" viewBox="0 0 84.4 84.4">
+      <path fill="#EFEFEF" d="M53.9,35.2c-1-2-2.4-3.5-4.2-4.7-1.8-1.1-3.9-1.7-6.4-1.7h-10.6v26.2h10.6c2.5,0,4.6-.6,6.4-1.7,1.8-1.1,3.2-2.7,4.2-4.7,1-2,1.5-4.2,1.5-6.7s-.5-4.8-1.5-6.7ZM49.6,42c0,1.5-.3,2.8-.8,3.9-.5,1.1-1.2,2-2.2,2.6-.9.6-2,.9-3.3.9h-4.9v-15h4.9c1.3,0,2.4.3,3.3.9.9.6,1.7,1.5,2.2,2.6.5,1.1.8,2.5.8,4Z"/>
+      <path fill="#EFEFEF" d="M30.2,20.5c8.3-4.6,18.7-4,26.4,1.5.7.5,1.5.7,2.4.5.8-.1,1.6-.6,2-1.3,1-1.4.7-3.4-.7-4.4-4.7-3.4-10.3-5.3-16.1-5.7-.7,0-1.3,0-2,0-5.3,0-10.4,1.3-15.1,3.9-5.2,2.9-9.5,7.2-12.3,12.5-2.8,5.1-4,10.9-3.7,16.6,0,1.7,1.5,3,3.2,3h0c0,0,.1,0,.2,0,1.8-.1,3.1-1.6,3-3.3-.6-9.5,4.5-18.6,12.8-23.2Z"/>
+      <path fill="#EFEFEF" d="M73.3,40.3c0-.8-.4-1.6-1.1-2.2-.6-.6-1.4-.8-2.3-.8-1.7.1-3.1,1.6-3,3.3.6,9.5-4.5,18.6-12.8,23.2-8.3,4.6-18.7,4-26.4-1.5-.5-.4-1.2-.6-1.8-.6s-.4,0-.5,0c-.8.1-1.6.6-2.1,1.3-1,1.4-.7,3.4.8,4.4,4.7,3.4,10.3,5.3,16.1,5.7.4,0,.9,0,1.4,0h.6c5.3,0,10.5-1.4,15.1-3.9,5.2-2.9,9.5-7.2,12.3-12.5,2.8-5.1,4-10.9,3.7-16.6Z"/>
+    </symbol>
+  </defs>
+
+  <g transform="translate(8, 10) rotate(-12, 28, 28)"><use href="#D" width="56" height="56"/></g>
+  <g transform="translate(100, -5) rotate(8, 22, 22)"><use href="#D" width="44" height="44"/></g>
+  <g transform="translate(195, 18) rotate(-20, 32, 32)"><use href="#D" width="64" height="64"/></g>
+  <g transform="translate(330, 5) rotate(15, 25, 25)"><use href="#D" width="50" height="50"/></g>
+  <g transform="translate(415, 30) rotate(-8, 28, 28)"><use href="#D" width="56" height="56"/></g>
+
+  <g transform="translate(-10, 110) rotate(18, 24, 24)"><use href="#D" width="48" height="48"/></g>
+  <g transform="translate(75, 90) rotate(-5, 30, 30)"><use href="#D" width="60" height="60"/></g>
+  <g transform="translate(175, 100) rotate(22, 22, 22)"><use href="#D" width="44" height="44"/></g>
+  <g transform="translate(270, 85) rotate(-14, 34, 34)"><use href="#D" width="68" height="68"/></g>
+  <g transform="translate(380, 105) rotate(10, 26, 26)"><use href="#D" width="52" height="52"/></g>
+
+  <g transform="translate(20, 205) rotate(-18, 26, 26)"><use href="#D" width="52" height="52"/></g>
+  <g transform="translate(125, 215) rotate(6, 32, 32)"><use href="#D" width="64" height="64"/></g>
+  <g transform="translate(235, 200) rotate(-9, 22, 22)"><use href="#D" width="44" height="44"/></g>
+  <g transform="translate(330, 210) rotate(20, 28, 28)"><use href="#D" width="56" height="56"/></g>
+  <g transform="translate(430, 195) rotate(-15, 24, 24)"><use href="#D" width="48" height="48"/></g>
+
+  <g transform="translate(-5, 300) rotate(12, 30, 30)"><use href="#D" width="60" height="60"/></g>
+  <g transform="translate(95, 310) rotate(-22, 24, 24)"><use href="#D" width="48" height="48"/></g>
+  <g transform="translate(195, 295) rotate(16, 28, 28)"><use href="#D" width="56" height="56"/></g>
+  <g transform="translate(295, 315) rotate(-6, 22, 22)"><use href="#D" width="44" height="44"/></g>
+  <g transform="translate(395, 300) rotate(9, 30, 30)"><use href="#D" width="60" height="60"/></g>
+
+  <g transform="translate(30, 395) rotate(-10, 22, 22)"><use href="#D" width="44" height="44"/></g>
+  <g transform="translate(140, 405) rotate(18, 28, 28)"><use href="#D" width="56" height="56"/></g>
+  <g transform="translate(255, 390) rotate(-16, 24, 24)"><use href="#D" width="48" height="48"/></g>
+  <g transform="translate(360, 408) rotate(7, 26, 26)"><use href="#D" width="52" height="52"/></g>
+  <g transform="translate(440, 395) rotate(-20, 22, 22)"><use href="#D" width="44" height="44"/></g>
+</svg>

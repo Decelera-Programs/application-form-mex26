@@ -4,13 +4,17 @@
  * Flow on completion:
  *   1. Upsert Person (match by email)
  *   2. Upsert Company (match by domain if available, else plain create)
- *   3. Create Deal linked to Company + Person
- *   4. Add Deal to "Startups Deal Flow LATAM" list (slug: startups_deal_flow_2)
+ *   3. Link Person → Company (PATCH person.company)
+ *   4. Create Deal (form fields only, no associations)
+ *   5. Link Deal → Company + Person (PATCH deal.associated_company / .associated_people / .person)
+ *   6. Add Deal to "Startups Deal Flow LATAM" list (slug: startups_deal_flow_2)
  *
  * Company domain strategy:
  *   - Has domain → PUT with matching_attribute=domains (upsert): creates or merges.
  *     Attio enforces domain uniqueness so there is always at most one company per domain.
  *   - No domain → POST create (name-only, no uniqueness constraint).
+ *
+ * Select fields: flow-config options are identical to Attio option titles — no mapping needed.
  */
 
 const ATTIO_API = 'https://api.attio.com/v2';
@@ -55,9 +59,12 @@ async function attioFetch<T>(
 
 function extractDomain(url: string): string | null {
   try {
-    const u = new URL(url.startsWith('http') ? url : `https://${url}`);
-    // Remove www. prefix — Attio normalizes domains without it
-    return u.hostname.replace(/^www\./, '');
+    const trimmed = url.trim();
+    if (!trimmed) return null;
+    const u = new URL(trimmed.startsWith('http') ? trimmed : `https://${trimmed}`);
+    const host = u.hostname.replace(/^www\./, '').toLowerCase();
+    // Reject anything that isn't a real domain (must have at least one dot)
+    return host.includes('.') ? host : null;
   } catch {
     return null;
   }
@@ -72,7 +79,7 @@ export interface PersonInput {
 }
 
 async function upsertPerson(input: PersonInput): Promise<AttioResult<{ id: string }>> {
-  // Safe: email is the matching attribute for people — no domain conflict risk
+  const email = input.email.trim().toLowerCase();
   const result = await attioFetch<{ data: { id: { record_id: string } } }>(
     '/objects/people/records?matching_attribute=email_addresses',
     {
@@ -81,7 +88,7 @@ async function upsertPerson(input: PersonInput): Promise<AttioResult<{ id: strin
         data: {
           values: {
             name: [{ first_name: input.fullName.split(' ')[0], last_name: input.fullName.split(' ').slice(1).join(' ') || '', full_name: input.fullName }],
-            email_addresses: [{ email_address: input.email }],
+            email_addresses: [{ email_address: email }],
             ...(input.linkedin ? { linkedin: [{ value: input.linkedin }] } : {}),
           },
         },
@@ -101,12 +108,6 @@ export interface CompanyInput {
   description?: string;
 }
 
-/**
- * Company strategy:
- *   - Has domain → upsert by domain (matching_attribute=domains). Attio enforces
- *     domain uniqueness, so this safely creates or merges with the existing record.
- *   - No domain → plain POST create (no uniqueness constraint to worry about).
- */
 async function resolveCompany(input: CompanyInput): Promise<AttioResult<{ id: string; existed: boolean }>> {
   const domain = input.website ? extractDomain(input.website) : null;
 
@@ -127,7 +128,6 @@ async function resolveCompany(input: CompanyInput): Promise<AttioResult<{ id: st
     return { ok: true, data: { id: result.data.data.id.record_id, existed: false } };
   }
 
-  // No domain → create name-only record
   const result = await attioFetch<{ data: { id: { record_id: string } } }>(
     '/objects/companies/records',
     {
@@ -146,7 +146,27 @@ async function resolveCompany(input: CompanyInput): Promise<AttioResult<{ id: st
   return { ok: true, data: { id: result.data.data.id.record_id, existed: false } };
 }
 
-// ---- Step 3: Deal ----
+// ---- Step 3: Link Person → Company ----
+
+async function linkPersonToCompany(personId: string, companyId: string): Promise<AttioResult<void>> {
+  const result = await attioFetch<unknown>(
+    `/objects/people/records/${personId}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({
+        data: {
+          values: {
+            company: [{ target_object: 'companies', target_record_id: companyId }],
+          },
+        },
+      }),
+    }
+  );
+  if (!result.ok) return result;
+  return { ok: true, data: undefined };
+}
+
+// ---- Step 4: Deal ----
 
 export interface DealInput {
   companyId: string;
@@ -157,20 +177,12 @@ export interface DealInput {
 async function createDeal(input: DealInput): Promise<AttioResult<{ id: string }>> {
   const a = input.answers;
 
-  // Build values — only include fields that have actual data
   const values: Record<string, unknown> = {
-    // Required
     name: [{ value: String(a.startup_name ?? 'Unnamed startup') }],
-    stage: [{ status: { title: DEAL_STAGE_LEADS_MEXICO } }],
-    owner: [{ workspace_member_id: DEAL_OWNER_MEMBER_ID }],
-
-    // Relationships
-    associated_company: [{ target_object: 'companies', target_record_id: input.companyId }],
-    associated_people: [{ target_object: 'people', target_record_id: input.personId }],
-    person: [{ target_object: 'people', target_record_id: input.personId }],
+    stage: [{ status: DEAL_STAGE_LEADS_MEXICO }],
+    owner: [{ referenced_actor_type: 'workspace-member', referenced_actor_id: DEAL_OWNER_MEMBER_ID }],
   };
 
-  // Conditionally add fields
   const addText = (slug: string, val: unknown) => {
     if (val) values[slug] = [{ value: String(val) }];
   };
@@ -178,7 +190,7 @@ async function createDeal(input: DealInput): Promise<AttioResult<{ id: string }>
     if (val) values[slug] = String(val);
   };
   const addBool = (slug: string, val: unknown) => {
-    if (val !== undefined && val !== null) values[slug] = val ? 'Sí' : 'No';
+    if (val !== undefined && val !== null) values[slug] = val ? 'Yes' : 'No';
   };
   const addMultiSelect = (slug: string, val: unknown) => {
     if (Array.isArray(val) && val.length > 0) values[slug] = val.map(String);
@@ -230,7 +242,8 @@ async function createDeal(input: DealInput): Promise<AttioResult<{ id: string }>
   addNumber('acv', a.acv);
   addNumber('potential_clients', a.potential_clients);
   addSelect('equity', a.equity);
-  addNumber('pre_money_valuation_7', a.pre_money_valuation);
+  if (a.pre_money_valuation !== undefined && a.pre_money_valuation !== null && a.pre_money_valuation !== '')
+    values['pre_money_valuation_7'] = [{ value: String(a.pre_money_valuation) }];
 
   // Defensibility / Why now
   addMultiSelect('defensibility_4', a.defensibility);
@@ -258,7 +271,29 @@ async function createDeal(input: DealInput): Promise<AttioResult<{ id: string }>
   return { ok: true, data: { id: result.data.data.id.record_id } };
 }
 
-// ---- Step 4: Add deal to LATAM list ----
+// ---- Step 5: Link Deal → Company (and Person) ----
+
+async function linkDealToCompanyAndPerson(dealId: string, companyId: string, personId: string): Promise<AttioResult<void>> {
+  const result = await attioFetch<unknown>(
+    `/objects/deals/records/${dealId}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({
+        data: {
+          values: {
+            associated_company: [{ target_object: 'companies', target_record_id: companyId }],
+            associated_people: [{ target_object: 'people', target_record_id: personId }],
+            person: [{ target_object: 'people', target_record_id: personId }],
+          },
+        },
+      }),
+    }
+  );
+  if (!result.ok) return result;
+  return { ok: true, data: undefined };
+}
+
+// ---- Step 6: Add deal to LATAM list ----
 
 async function addDealToLatamList(dealId: string): Promise<AttioResult<void>> {
   const result = await attioFetch<unknown>(
@@ -269,6 +304,7 @@ async function addDealToLatamList(dealId: string): Promise<AttioResult<void>> {
         data: {
           parent_record_id: dealId,
           parent_object: 'deals',
+          entry_values: {},
         },
       }),
     }
@@ -292,20 +328,18 @@ export async function syncSessionToAttio(
   answers: Record<string, unknown>
 ): Promise<AttioResult<SyncResult>> {
 
-  // 1. Person
   if (!answers.founder_email) {
     return { ok: false, error: 'Missing founder email — cannot sync to Attio' };
   }
 
   const personResult = await upsertPerson({
-    fullName: String(answers.founder_name ?? ''),
-    email: String(answers.founder_email),
+    fullName: String(answers.founder_name ?? '').trim(),
+    email: String(answers.founder_email).trim().toLowerCase(),
     linkedin: answers.founder_linkedin ? String(answers.founder_linkedin) : undefined,
   });
   if (!personResult.ok) return personResult;
   const personId = personResult.data.id;
 
-  // 2. Company (safe domain handling)
   const companyResult = await resolveCompany({
     name: String(answers.startup_name ?? 'Unnamed startup'),
     website: answers.startup_website ? String(answers.startup_website) : undefined,
@@ -314,12 +348,20 @@ export async function syncSessionToAttio(
   if (!companyResult.ok) return companyResult;
   const { id: companyId, existed: companyExisted } = companyResult.data;
 
-  // 3. Deal
+  const linkPersonResult = await linkPersonToCompany(personId, companyId);
+  if (!linkPersonResult.ok) {
+    console.warn(`[Attio] Person-company link failed: ${linkPersonResult.error}`);
+  }
+
   const dealResult = await createDeal({ companyId, personId, answers });
   if (!dealResult.ok) return dealResult;
   const dealId = dealResult.data.id;
 
-  // 4. Add to LATAM list (best-effort — don't fail the whole sync if this fails)
+  const linkDealResult = await linkDealToCompanyAndPerson(dealId, companyId, personId);
+  if (!linkDealResult.ok) {
+    console.warn(`[Attio] Deal-company link failed: ${linkDealResult.error}`);
+  }
+
   const listResult = await addDealToLatamList(dealId);
   if (!listResult.ok) {
     console.warn(`[Attio] Deal created but failed to add to LATAM list: ${listResult.error}`);

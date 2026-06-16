@@ -6,18 +6,15 @@
  * and retries the sync. Max 5 attempts with exponential backoff.
  */
 
-import { getUnsyncedSessions, updateAttioIds } from './sessionService';
+import { getUnsyncedSessions, updateAttioIds, incrementSyncAttempts } from './sessionService';
 import { syncSessionToAttio } from './attioService';
 
 const MAX_ATTEMPTS = 5;
 
-// Track attempt counts in memory (reset on restart — that's fine)
-const attemptCounts: Record<string, number> = {};
-
 export async function runRetryWorker(): Promise<void> {
   let sessions;
   try {
-    sessions = await getUnsyncedSessions();
+    sessions = await getUnsyncedSessions(MAX_ATTEMPTS);
   } catch (err) {
     console.error('[RetryWorker] Failed to fetch unsynced sessions:', err);
     return;
@@ -28,17 +25,6 @@ export async function runRetryWorker(): Promise<void> {
   console.log(`[RetryWorker] ${sessions.length} session(s) pending Attio sync`);
 
   for (const session of sessions) {
-    const attempts = attemptCounts[session.id] ?? 0;
-
-    if (attempts >= MAX_ATTEMPTS) {
-      console.error(
-        `[RetryWorker] Session ${session.id} exceeded max attempts (${MAX_ATTEMPTS}). Manual review needed.`
-      );
-      continue;
-    }
-
-    attemptCounts[session.id] = attempts + 1;
-
     const result = await syncSessionToAttio(session.answers);
 
     if (result.ok) {
@@ -48,11 +34,11 @@ export async function runRetryWorker(): Promise<void> {
         result.data.companyId,
         result.data.dealId
       );
-      delete attemptCounts[session.id];
       console.log(`[RetryWorker] ✅ Session ${session.id} synced to Attio — deal: ${result.data.dealId}`);
     } else {
+      await incrementSyncAttempts(session.id);
       console.warn(
-        `[RetryWorker] ⚠️  Session ${session.id} sync failed (attempt ${attempts + 1}): ${result.error}`
+        `[RetryWorker] ⚠️  Session ${session.id} sync failed: ${result.error}`
       );
     }
   }
