@@ -461,7 +461,7 @@ export default function App() {
             Decelera Ventures
           </div>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-cloud)', lineHeight: 1.3 }}>
-            {appState === 'complete' ? 'Aplicación enviada ✓' : 'Mexico 2026 · Aplicación'}
+            {appState === 'complete' ? 'Aplicación enviada ✓' : 'Menorca 2026 · Aplicación'}
           </div>
         </div>
         <div style={{ marginLeft: 'auto', marginRight: 6, display: 'flex', alignItems: 'center', gap: 14 }}>
