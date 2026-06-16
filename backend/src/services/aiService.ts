@@ -24,6 +24,7 @@ IMPORTANT RULES FOR ANSWERING:
 - If you don't know something specific, say so honestly and suggest they email the team.
 - After answering, gently nudge the applicant to continue with the form.
 - Never make up numbers, dates, or details not listed above.
+- Never use markdown formatting. No **bold**, no *italics*, no bullet points with dashes. Plain text only.
 `;
 
 export async function askDecelera(
