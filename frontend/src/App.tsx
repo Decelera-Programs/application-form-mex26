@@ -107,10 +107,6 @@ export default function App() {
                   if (display) restored.push({ id: `user-${entry.stepId}`, type: 'user', text: display });
                 }
               }
-              const n = restoredHistory.length;
-              restored.push({ id: 'w-back', type: 'bot', text: `¡Bienvenido de nuevo! 👋 Tienes ${n} pregunta${n !== 1 ? 's' : ''} respondida${n !== 1 ? 's' : ''} — seguimos donde lo dejaste.` });
-              restored.push({ id: 'bot-current', type: 'bot', text: data.step.question });
-
               const restoredHistory: AnswerHistoryItem[] = (data.history ?? [])
                 .filter((e: HistoryEntry) => e.type !== 'statement' && e.answer !== null && e.answer !== undefined)
                 .map((e: HistoryEntry) => {
@@ -120,6 +116,9 @@ export default function App() {
                     : String(e.answer);
                   return { stepId: e.stepId, question: e.question, answer: e.answer, displayAnswer: d };
                 });
+              const n = restoredHistory.length;
+              restored.push({ id: 'w-back', type: 'bot', text: `¡Bienvenido de nuevo! 👋 Tienes ${n} pregunta${n !== 1 ? 's' : ''} respondida${n !== 1 ? 's' : ''} — seguimos donde lo dejaste.` });
+              restored.push({ id: 'bot-current', type: 'bot', text: data.step.question });
               isRestoringRef.current = true;
               setMessages(restored);
               setAnswerHistory(restoredHistory);
