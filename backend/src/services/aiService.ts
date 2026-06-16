@@ -15,7 +15,7 @@ ABOUT DECELERA VENTURES:
 
 HOW WE INVEST — 5 PHASES:
 1. Selection (up to 3 months): A rigorous process with 70+ industry experts and a top-tier investment team evaluating each round of applications.
-2. Decelera Program (7 days): Selected startups join a 7-day immersive program in Akumal, Mexico (Menorca 2026: May 22–29) and gain access to key experts and potential investment opportunities.
+2. Decelera Program (7 days): Selected startups join a 7-day immersive program in Playa del Carmen, Mexico (May 22–29, 2026) and gain access to key experts and potential investment opportunities.
 3. Final Decision (avg. 2 months): Final Due Diligence to ensure selected startups are viable and primed for growth.
 4. Investment: Companies where we find a clear match receive seed funding.
 5. Post-investment: We act as a fourth founder and provide active support plus follow-on investments of up to $2M for top performers.
@@ -36,7 +36,7 @@ export async function askDecelera(
   const systemPrompt = `${DECELERA_CONTEXT}
 
 CURRENT CONTEXT:
-- The applicant is filling out the Decelera Menorca 2026 application form.
+- The applicant is filling out the Decelera Mexico 2026 application form.
 - They are currently on the question: "${context.currentQuestion ?? 'the application form'}"
 - They have answered ${context.answeredCount ?? 0} questions so far.`;
 
