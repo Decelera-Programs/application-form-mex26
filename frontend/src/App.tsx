@@ -305,20 +305,26 @@ export default function App() {
       return;
     }
 
-    // --- Free-form question (ends with ?) → AI ---
-    if (typeof answer === 'string' && answer.trim().endsWith('?') && !answer.trim().startsWith('/')) {
-      const q = answer.trim();
-      addUserMessage(q);
-      setIsTyping(true);
-      try {
-        const reply = await chatMessage(q, currentStep?.question, answerHistory.length);
-        addBotMessage(reply);
-      } catch {
-        addBotMessage('No pude conectar con el asistente ahora mismo. Continúa con el formulario.');
-      } finally {
-        setIsTyping(false);
+    // --- Free-form question: ends with ? or /ask [pregunta] → AI ---
+    if (typeof answer === 'string') {
+      const t = answer.trim();
+      const isAskCmd = t.toLowerCase().startsWith('/ask ');
+      const isQuestion = t.endsWith('?') && !t.startsWith('/');
+      if (isAskCmd || isQuestion) {
+        const q = isAskCmd ? t.slice(5).trim() : t;
+        if (!q) return;
+        addUserMessage(t);
+        setIsTyping(true);
+        try {
+          const reply = await chatMessage(q, currentStep?.question, answerHistory.length);
+          addBotMessage(reply);
+        } catch {
+          addBotMessage('No pude conectar con el asistente ahora mismo. Continúa con el formulario.');
+        } finally {
+          setIsTyping(false);
+        }
+        return;
       }
-      return;
     }
 
     // --- Normal flow: detect commands ---
@@ -340,6 +346,7 @@ export default function App() {
         setMessages(prev => [...prev, {
           id: `bot-help-${Date.now()}`, type: 'bot', text: '', html:
             `<b>Comandos disponibles:</b><br><br>` +
+            `<b>/ask [pregunta]</b> — Pregunta algo sobre Decelera<br>` +
             `<b>/correct</b> — Editar una respuesta anterior<br>` +
             `<b>/restart</b> — Empezar de cero<br>` +
             `<b>/summary</b> — Ver un resumen de tus respuestas<br>` +
@@ -621,6 +628,7 @@ function Screen({ children }: { children: React.ReactNode }) {
 }
 
 const COMMAND_HINTS = [
+  { cmd: '/ask',     desc: 'Pregunta algo sobre Decelera' },
   { cmd: '/correct', desc: 'Editar una respuesta' },
   { cmd: '/restart', desc: 'Empezar de cero' },
   { cmd: '/summary', desc: 'Ver resumen' },

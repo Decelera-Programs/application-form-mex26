@@ -2,13 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import type { FlowStep } from '../../../shared/types';
 
 const COMMAND_DEFS = [
+  { cmd: '/ask',     desc: 'Pregunta algo sobre Decelera' },
   { cmd: '/correct', desc: 'Editar una respuesta anterior' },
   { cmd: '/restart', desc: 'Empezar de cero' },
   { cmd: '/summary', desc: 'Ver un resumen de tus respuestas' },
   { cmd: '/help',    desc: 'Mostrar los comandos disponibles' },
 ];
 const KNOWN_COMMANDS = COMMAND_DEFS.map(c => c.cmd);
-const isKnownCommand = (v: string) => KNOWN_COMMANDS.includes(v.trim().toLowerCase());
+const isKnownCommand = (v: string) => {
+  const t = v.trim().toLowerCase();
+  return KNOWN_COMMANDS.includes(t) || t.startsWith('/ask ');
+};
 
 function CommandPicker({ query, onSelect }: { query: string; onSelect: (cmd: string) => void }) {
   const matches = COMMAND_DEFS.filter(c => c.cmd.startsWith(query.toLowerCase()));
