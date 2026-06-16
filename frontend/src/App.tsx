@@ -51,6 +51,7 @@ export default function App() {
   const [correctionStepId, setCorrectionStepId] = useState<string | null>(null);
   const [confirmingRestart, setConfirmingRestart] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
+  const [inputKey, setInputKey] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const isRestoringRef = useRef(false);
   const initRan = useRef(false);
@@ -322,6 +323,7 @@ export default function App() {
           addBotMessage('No pude conectar con el asistente ahora mismo. Continúa con el formulario.');
         } finally {
           setIsTyping(false);
+          setInputKey(k => k + 1);
         }
         return;
       }
@@ -573,7 +575,7 @@ export default function App() {
           : currentStep;
         return activeStep ? (
           <div style={{ padding: '8px 12px 10px', borderTop: '1px solid rgba(45,56,82,0.07)', flexShrink: 0 }}>
-            <StepInput step={activeStep} onSubmit={handleAnswer} disabled={isSubmitting || isTyping} />
+            <StepInput key={inputKey} step={activeStep} onSubmit={handleAnswer} disabled={isSubmitting || isTyping} />
             {correctionState === 'idle' && answerHistory.length > 0 && (
               <button
                 onClick={enterCorrectionMode}
