@@ -3,6 +3,7 @@ import type { FlowConfig } from '../../../shared/types';
 import { createSession, getSession, updateSessionAnswer, updateAttioIds, patchSessionAnswer, resetSession } from '../services/sessionService';
 import { resolveNextStep, interpolateQuestion, getStep, buildHistory } from '../services/flowEngine';
 import { syncSessionToAttio } from '../services/attioService';
+import { askDecelera } from '../services/aiService';
 
 // Load flow config — in production you might load from DB or file system
 import flowConfig from '../../../shared/flow-config.json';
@@ -169,6 +170,26 @@ router.get('/flow/steps/:stepId', (req: Request, res: Response) => {
   const step = getStep(flow, req.params.stepId);
   if (!step) return res.status(404).json({ error: 'Step not found' });
   res.json(step);
+});
+
+/**
+ * POST /chat
+ * Answers a free-form question about Decelera using Claude AI.
+ */
+router.post('/chat', async (req: Request, res: Response) => {
+  try {
+    const { message, currentQuestion, answeredCount } = req.body as {
+      message: string;
+      currentQuestion?: string;
+      answeredCount?: number;
+    };
+    if (!message) return res.status(400).json({ error: 'message required' });
+    const reply = await askDecelera(message, { currentQuestion, answeredCount });
+    res.json({ reply });
+  } catch (err) {
+    console.error('POST /chat error:', err);
+    res.status(500).json({ error: 'AI service unavailable' });
+  }
 });
 
 /**

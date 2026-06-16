@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { FlowStep, ApplicationSession } from '../../shared/types';
-import { startSession, submitAnswer, correctAnswer, getFlowStep, restartSession } from './hooks/useApi';
+import { startSession, submitAnswer, correctAnswer, getFlowStep, restartSession, chatMessage } from './hooks/useApi';
 import { ChatBubble, TypingIndicator } from './components/ChatBubble';
 import { Confetti } from './components/Confetti';
 import { StepInput } from './components/StepInput';
@@ -301,6 +301,22 @@ export default function App() {
         setCorrectionState('idle');
         setCorrectionStep(null);
         setCorrectionStepId(null);
+      }
+      return;
+    }
+
+    // --- Free-form question (ends with ?) → AI ---
+    if (typeof answer === 'string' && answer.trim().endsWith('?') && !answer.trim().startsWith('/')) {
+      const q = answer.trim();
+      addUserMessage(q);
+      setIsTyping(true);
+      try {
+        const reply = await chatMessage(q, currentStep?.question, answerHistory.length);
+        addBotMessage(reply);
+      } catch {
+        addBotMessage('No pude conectar con el asistente ahora mismo. Continúa con el formulario.');
+      } finally {
+        setIsTyping(false);
       }
       return;
     }

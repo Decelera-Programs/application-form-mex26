@@ -61,3 +61,18 @@ export async function getFlowStep(stepId: string): Promise<FlowStep> {
   if (!res.ok) throw new Error('Step not found');
   return res.json();
 }
+
+export async function chatMessage(
+  message: string,
+  currentQuestion?: string,
+  answeredCount?: number
+): Promise<string> {
+  const res = await fetch(`${API_BASE}/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, currentQuestion, answeredCount }),
+  });
+  if (!res.ok) throw new Error('Chat failed');
+  const data = await res.json();
+  return data.reply as string;
+}
