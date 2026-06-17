@@ -21,10 +21,52 @@ style.textContent = `
     --radius-button:    999px;
     --radius-input:     14px;
     --radius-container: 20px;
+
+    /* Responsive tokens — overridden at each breakpoint */
+    --chat-font:        18px;
+    --chat-padding:     0 48px 0 12px;
+    --chat-gap:         24px;
+    --mascot-size:      96px;
+
+    --input-padding:    0 48px;
+  }
+
+  @media (max-width: 1100px) {
+    :root {
+      --chat-font:    17px;
+      --chat-padding: 0 32px 0 8px;
+      --mascot-size:  80px;
+    }
+  }
+
+  @media (max-width: 860px) {
+    :root {
+      --chat-font:    16px;
+      --chat-padding: 0 24px 0 8px;
+      --chat-gap:     16px;
+      --mascot-size:  64px;
+
+    }
+  }
+
+  @media (max-width: 680px) {
+    :root {
+      --chat-font:    16px;
+      --chat-padding: 0 16px;
+      --input-padding: 0 16px;
+      --chat-gap:     0px;
+    }
+    .mascot-col { display: none !important; }
+  }
+
+  /* Mascot SVG respects CSS variable regardless of inline size prop */
+  .mascot-col svg {
+    width:  var(--mascot-size) !important;
+    height: var(--mascot-size) !important;
   }
 
   html, body { height: 100%; overflow: hidden; }
-  body { font-family: var(--font-body); background: #F8F8F8; }
+  body { font-family: var(--font-body); background: #1C2840; }
   #root { height: 100%; }
 
   @keyframes fadeSlideIn {
@@ -43,12 +85,23 @@ style.textContent = `
     30%            { transform: translateY(-5px); }
   }
 
+  @keyframes deceleroSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
   /* Scrollbar */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--color-cloud); border-radius: 2px; }
 
   button:disabled { opacity: 0.45; cursor: not-allowed !important; }
+
+  /* Responsive sidebar */
+  @media (max-width: 680px) {
+    .app-sidebar        { display: none !important; }
+    .mobile-block-bar   { display: flex !important; }
+  }
 `;
 document.head.appendChild(style);
 

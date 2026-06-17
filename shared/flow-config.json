@@ -1,39 +1,42 @@
 {
-  "id": "decelera-mex26-application-v1",
-  "version": "1.0.0",
-  "title": "Apply to Decelera Mexico 2026",
-  "welcomeMessage": "Hey! 👋\n\nYou're about to apply to Decelera Mexico 2026, our intensive program for early-stage founders.\n\nAround 40 questions — answer honestly, there are no perfect answers. Carlota and the team review everything personally.\n\nBy continuing, you agree to your data being processed for candidate evaluation.",
-  "completionMessage": "All done! 🙌\n\nWe've received your application for Decelera Mexico 2026. We review everything personally and will be in touch within the next 2 weeks.\n\nBreath. Focus. Grow.",
-  "startStep": "startup_name",
+  "id": "decelera-latam26-application-v1",
+  "version": "2.0.0",
+  "title": "Aplica a Decelera LATAM 2026",
+  "welcomeMessage": "¡Hola! 👋\n\nSoy la asistente de Carlota, nuestra Dealflow Manager. Ahora está sumergida en pitch decks y café ☕, así que me pidió ayudarte con tu aplicación para Decelera LATAM 2026 🌎🚀\n\nSomos un fondo founder-first — ofrecemos hasta $1M en initial funding y una residencia 100% sponsored de 7 días para encontrar nuestras próximas startups.\n\nEsto te tomará unos 11 minutos. Si te equivocas en algo, podrás corregirlo al final.\n\nAl continuar, aceptas que tus datos sean procesados para la evaluación de tu candidatura.",
+  "completionMessage": "¡Aplicación enviada! 🚀🎉\n\n¡Gracias por aplicar a Decelera LATAM 2026! 🌎\n\nRevisamos todo personalmente y te avisaremos en máximo 7 días si pasas a la siguiente etapa. Mientras tanto, sigue construyendo 💪\n\nCualquier duda, escríbenos a hola@decelera.com",
+  "startStep": "section_about_you",
   "steps": {
 
-    "startup_name": {
-      "id": "startup_name",
-      "type": "text",
-      "question": "What's your startup's name?",
-      "placeholder": "Startup name",
-      "required": true,
-      "nextStep": "founder_name",
-      "attioField": "name",
-      "attioObject": "companies"
+    "section_about_you": {
+      "id": "section_about_you",
+      "type": "statement",
+      "question": "¡Empecemos por ti! 👋\n\nUnas preguntas rápidas sobre quién eres y quién está contigo en esto.",
+      "nextStep": "founder_first_name"
     },
 
-    "founder_name": {
-      "id": "founder_name",
+    "founder_first_name": {
+      "id": "founder_first_name",
       "type": "text",
-      "question": "And you? What's your full name?",
-      "placeholder": "Your full name",
+      "question": "¿Cómo te llamas?",
+      "placeholder": "Tu nombre",
       "required": true,
-      "nextStep": "founder_email",
-      "attioField": "name",
-      "attioObject": "people"
+      "nextStep": "founder_last_name"
+    },
+
+    "founder_last_name": {
+      "id": "founder_last_name",
+      "type": "text",
+      "question": "¿Y tu apellido?",
+      "placeholder": "Tu apellido",
+      "required": true,
+      "nextStep": "founder_email"
     },
 
     "founder_email": {
       "id": "founder_email",
       "type": "email",
-      "question": "What's your contact email?",
-      "placeholder": "you@startup.com",
+      "question": "¿Cuál es tu email profesional? 📧\n\nPor ahí te contactaremos si avanzas.",
+      "placeholder": "tu@startup.com",
       "required": true,
       "nextStep": "founder_linkedin",
       "attioField": "email_addresses",
@@ -43,19 +46,95 @@
     "founder_linkedin": {
       "id": "founder_linkedin",
       "type": "url",
-      "question": "Your LinkedIn profile?",
-      "placeholder": "https://linkedin.com/in/yourname",
+      "question": "Pásame tu LinkedIn — siempre lo miramos 👀",
+      "placeholder": "https://linkedin.com/in/tunombre",
       "required": false,
-      "nextStep": "startup_website",
+      "nextStep": "founder_nationality",
       "attioField": "linkedin_1",
       "attioObject": "deals"
+    },
+
+    "founder_nationality": {
+      "id": "founder_nationality",
+      "type": "multiselect",
+      "question": "¿De dónde son originalmente los founders del equipo? Marca todos los que apliquen.",
+      "required": true,
+      "options": [
+        "México",
+        "Colombia",
+        "Chile",
+        "Argentina",
+        "Perú",
+        "Uruguay",
+        "Centroamérica & Caribe",
+        "USA",
+        "Europa",
+        "Brasil",
+        "Otro"
+      ],
+      "nextStep": "number_of_founders"
+    },
+
+    "number_of_founders": {
+      "id": "number_of_founders",
+      "type": "select",
+      "question": "¿Cuántos founders full-time hay en el equipo?",
+      "required": true,
+      "options": ["1", "2", "3", "4+"],
+      "nextStep": "technical_cofounder",
+      "attioField": "number_of_founders",
+      "attioObject": "deals"
+    },
+
+    "technical_cofounder": {
+      "id": "technical_cofounder",
+      "type": "boolean",
+      "question": "¿Hay un technical founder en el equipo? 🛠️",
+      "required": true,
+      "nextStep": "equity",
+      "attioField": "full_time_cto",
+      "attioObject": "deals"
+    },
+
+    "equity": {
+      "id": "equity",
+      "type": "select",
+      "question": "¿Qué porcentaje de la empresa está en manos de los founders?",
+      "required": true,
+      "options": [
+        "< 40%",
+        "40% - 60%",
+        "60% - 80%",
+        "> 80%"
+      ],
+      "nextStep": "section_company",
+      "attioField": "equity",
+      "attioObject": "deals"
+    },
+
+    "section_company": {
+      "id": "section_company",
+      "type": "statement",
+      "question": "¡Cuéntanos de tu startup! 🚀\n\n6 preguntas sobre el setup y el sector.",
+      "nextStep": "startup_name"
+    },
+
+    "startup_name": {
+      "id": "startup_name",
+      "type": "text",
+      "question": "¿Cómo se llama tu startup?",
+      "placeholder": "Nombre de la startup",
+      "required": true,
+      "nextStep": "startup_website",
+      "attioField": "name",
+      "attioObject": "companies"
     },
 
     "startup_website": {
       "id": "startup_website",
       "type": "url",
-      "question": "Do you have a website or landing page?",
-      "placeholder": "https://yourstartup.com",
+      "question": "¿Tienen web o dominio? Pásamelo 🌐",
+      "placeholder": "https://tustartup.com",
       "required": false,
       "nextStep": "constitution_location",
       "attioField": "domains",
@@ -65,7 +144,7 @@
     "constitution_location": {
       "id": "constitution_location",
       "type": "select",
-      "question": "In which country is {{startup_name}} incorporated?",
+      "question": "¿Dónde está incorporada oficialmente {{startup_name}}?",
       "required": true,
       "options": [
         "LATAM",
@@ -85,7 +164,7 @@
     "operations_location": {
       "id": "operations_location",
       "type": "multiselect",
-      "question": "In which markets do you operate or plan to operate? (Select all that apply)",
+      "question": "¿Y dónde opera {{startup_name}}? Marca todos los mercados donde tienen operación.",
       "required": true,
       "options": [
         "LATAM",
@@ -106,69 +185,18 @@
     "constitution_year": {
       "id": "constitution_year",
       "type": "number",
-      "question": "What year was the company incorporated?",
+      "question": "¿En qué año se constituyó {{startup_name}}?",
       "placeholder": "2023",
       "required": true,
-      "nextStep": "number_of_founders",
-      "attioField": "constitution_year",
-      "attioObject": "deals"
-    },
-
-    "number_of_founders": {
-      "id": "number_of_founders",
-      "type": "select",
-      "question": "How many full-time founders are there?",
-      "required": true,
-      "options": ["1", "2", "3", "4+"],
-      "nextStep": "equity",
-      "attioField": "number_of_founders",
-      "attioObject": "deals"
-    },
-
-    "equity": {
-      "id": "equity",
-      "type": "select",
-      "question": "What percentage of equity does the founding team retain?",
-      "required": true,
-      "options": [
-        "< 40%",
-        "40% - 60%",
-        "60% - 80%",
-        "> 80%"
-      ],
-      "nextStep": "business_model",
-      "attioField": "equity",
-      "attioObject": "deals"
-    },
-
-    "business_model": {
-      "id": "business_model",
-      "type": "multiselect",
-      "question": "What is {{startup_name}}'s business model? (Select all that apply)",
-      "required": true,
-      "options": [
-        "SaaS",
-        "Usage-based",
-        "Marketplace",
-        "Transaction-based",
-        "Licensing",
-        "Hardware",
-        "Advertising",
-        "Enterprise / Contracts",
-        "B2B",
-        "B2C",
-        "Consulting",
-        "Other"
-      ],
       "nextStep": "startup_sector",
-      "attioField": "business_model",
+      "attioField": "constitution_year",
       "attioObject": "deals"
     },
 
     "startup_sector": {
       "id": "startup_sector",
-      "type": "multiselect",
-      "question": "In which sector(s) does {{startup_name}} operate? (Select all that apply)",
+      "type": "select",
+      "question": "¿En qué sector está {{startup_name}}?",
       "required": true,
       "options": [
         "HealthTech",
@@ -192,59 +220,96 @@
         "Impact & Social Enterprises",
         "Advanced Materials"
       ],
-      "nextStep": "raised_amount",
+      "nextStep": "business_model",
       "attioField": "sector",
+      "attioObject": "deals"
+    },
+
+    "business_model": {
+      "id": "business_model",
+      "type": "select",
+      "question": "¿Cuál es el modelo de negocio de {{startup_name}}?",
+      "required": true,
+      "options": [
+        "SaaS",
+        "Usage-based",
+        "Marketplace",
+        "Transaction-based",
+        "Licensing",
+        "Hardware",
+        "Advertising",
+        "Enterprise / Contracts",
+        "B2B",
+        "B2C",
+        "Consulting",
+        "Other"
+      ],
+      "nextStep": "section_round",
+      "attioField": "business_model",
+      "attioObject": "deals"
+    },
+
+    "section_round": {
+      "id": "section_round",
+      "type": "statement",
+      "question": "Hablemos de la ronda 💰\n\nSolo 5 datos rápidos para entender dónde están.",
+      "nextStep": "raising_amount"
+    },
+
+    "raising_amount": {
+      "id": "raising_amount",
+      "type": "select",
+      "question": "¿Cuánto buscan levantar en esta ronda?",
+      "required": true,
+      "options": [
+        "<$500K",
+        "$500K-$1M",
+        "$1M-$2M",
+        ">$2M"
+      ],
+      "nextStep": "round_stage",
+      "attioField": "raise",
+      "attioObject": "deals"
+    },
+
+    "round_stage": {
+      "id": "round_stage",
+      "type": "select",
+      "question": "¿Qué stage es esta ronda?",
+      "required": true,
+      "options": [
+        "Pre-Seed",
+        "Seed",
+        "Series A",
+        "Otro"
+      ],
+      "nextStep": "raised_amount",
+      "attioField": "stage_round",
       "attioObject": "deals"
     },
 
     "raised_amount": {
       "id": "raised_amount",
       "type": "select",
-      "question": "How much capital have you raised to date?",
+      "question": "¿Cuánto han levantado hasta hoy en total (todas las rondas previas)?",
       "required": true,
       "options": [
+        "Nada aún",
         "< 500k",
         "500k - 1.5M",
         "1.5M - 2.5M",
         "> 2.5M"
       ],
-      "nextStep": "raising_amount",
-      "attioField": "raised",
-      "attioObject": "deals"
-    },
-
-    "raising_amount": {
-      "id": "raising_amount",
-      "type": "number",
-      "question": "How much are you raising in this round? (in USD millions, e.g. 0.5 for $500k)",
-      "placeholder": "0.5",
-      "required": true,
-      "nextStep": "stage_round",
-      "attioField": "raise",
-      "attioObject": "deals"
-    },
-
-    "stage_round": {
-      "id": "stage_round",
-      "type": "select",
-      "question": "What percentage of the current round has been committed (soft/hard)?",
-      "required": true,
-      "options": [
-        "0 - 25%",
-        "25% - 50%",
-        "50% - 75%",
-        "75%"
-      ],
       "nextStep": "pre_money_valuation",
-      "attioField": "stage_round",
+      "attioField": "raised",
       "attioObject": "deals"
     },
 
     "pre_money_valuation": {
       "id": "pre_money_valuation",
       "type": "number",
-      "question": "What is your pre-money valuation? (in USD millions, e.g. 3 for $3M)",
-      "placeholder": "3",
+      "question": "¿Cuál es la valoración pre-money que están manejando? (en USD millones, ej. 8 para $8M)",
+      "placeholder": "8",
       "required": false,
       "nextStep": "runway",
       "attioField": "pre_money_valuation_7",
@@ -254,7 +319,7 @@
     "runway": {
       "id": "runway",
       "type": "select",
-      "question": "How much runway do you currently have?",
+      "question": "¿Cuál es su runway actual?",
       "required": true,
       "options": [
         "0 - 2 Months",
@@ -262,218 +327,175 @@
         "6 - 12 Months",
         "12+ Months"
       ],
-      "nextStep": "deck_url",
+      "nextStep": "section_metrics",
       "attioField": "runway",
       "attioObject": "deals"
     },
 
-    "deck_url": {
-      "id": "deck_url",
-      "type": "url",
-      "question": "Do you have a pitch deck? Share the link (Google Drive, Docsend, Notion...)",
-      "placeholder": "https://drive.google.com/...",
-      "required": false,
-      "nextStep": "section_team",
-      "attioField": "deck_url",
-      "attioObject": "deals"
-    },
-
-    "section_team": {
-      "id": "section_team",
+    "section_metrics": {
+      "id": "section_metrics",
       "type": "statement",
-      "question": "Great, we have the basics on {{startup_name}} 🎉\n\nNow tell us about the team. At this stage, the team is everything.",
-      "nextStep": "collective_milestones"
+      "question": "Métricas time 📊\n\nVamos con North Star, growth, churn y burn.",
+      "nextStep": "north_star"
     },
 
-    "collective_milestones": {
-      "id": "collective_milestones",
-      "type": "multiselect",
-      "question": "What profiles are on the founding team? (Select all that apply)",
-      "required": false,
-      "options": [
-        "Serial founder exit +10M",
-        "Serial founder exit -10M",
-        "Serial founder no exit",
-        "Early employee Unicorn-Scaleup",
-        "PhD or Senior Investigator",
-        "Senior Corporate +10y",
-        "First-time founder"
-      ],
-      "nextStep": "relevant_experience_explanation",
-      "attioField": "collective_milestones",
-      "attioObject": "deals"
-    },
-
-    "relevant_experience_explanation": {
-      "id": "relevant_experience_explanation",
+    "north_star": {
+      "id": "north_star",
       "type": "textarea",
-      "question": "Briefly tell us about the most relevant experience the team has to build {{startup_name}}.",
-      "placeholder": "e.g. We've spent 8 years in the health sector and have built teams at companies like...",
+      "question": "¿Cuál es su North Star Metric — la que mejor refleja el valor que entregan?",
+      "placeholder": "ej. \"$18K MRR\", \"45K MAUs\", \"3.2M transacciones/mes\"",
       "required": true,
-      "nextStep": "technical_cofounder",
-      "attioField": "relevant_experience_explanation",
+      "nextStep": "mom_growth",
+      "attioField": "north_star",
       "attioObject": "deals"
     },
 
-    "technical_cofounder": {
-      "id": "technical_cofounder",
-      "type": "boolean",
-      "question": "Is there a full-time technical co-founder (CTO) on the team?",
-      "required": true,
-      "nextStep": "experience_in_sector",
-      "attioField": "full_time_cto",
-      "attioObject": "deals"
-    },
-
-    "experience_in_sector": {
-      "id": "experience_in_sector",
+    "mom_growth": {
+      "id": "mom_growth",
       "type": "select",
-      "question": "How many years of sector experience does the founding team have in {{startup_name}}'s space?",
+      "question": "¿Cuál es su MoM growth promedio del último trimestre?",
       "required": true,
       "options": [
-        "0 - 2 years",
-        "2 - 5 years",
-        "6 - 12 years",
-        "+12 years"
+        ">20%",
+        "10-20%",
+        "5-10%",
+        "<5%",
+        "NA (building/pivoting)"
       ],
-      "nextStep": "most_significant_milestone",
-      "attioField": "experience_in_sector",
+      "nextStep": "net_burn",
+      "attioField": "mom_growth",
       "attioObject": "deals"
     },
 
-    "most_significant_milestone": {
-      "id": "most_significant_milestone",
-      "type": "multiselect",
-      "question": "Which of these milestones have you achieved? (Select all that apply)",
-      "required": false,
-      "options": [
-        "Built and launched the MVP without external funding or 3rd party devs.",
-        "Secured 3+ LOIs or Pilot agreements before having a finished product.",
-        "Convinced a Tier 1 Senior profile to leave their job and join as Co-founder/Early hire (minimum salary).",
-        "Reached +€5k MRR (or equivalent usage) within the first 12 weeks of launch.",
-        "None of the above yet."
-      ],
-      "nextStep": "section_market",
-      "attioField": "most_significant_milestone_6",
-      "attioObject": "deals"
-    },
-
-    "section_market": {
-      "id": "section_market",
-      "type": "statement",
-      "question": "Good. Now let's talk about the market.\n\nThe Decelerators look at this section very carefully — be specific. 🎯",
-      "nextStep": "the_secret"
-    },
-
-    "the_secret": {
-      "id": "the_secret",
-      "type": "textarea",
-      "question": "Tell us something you know about your industry that the big incumbents don't understand or ignore.",
-      "placeholder": "The insight nobody else has...",
-      "required": true,
-      "maxLength": 280,
-      "nextStep": "external_tailwind",
-      "attioField": "the_secret",
-      "attioObject": "deals"
-    },
-
-    "external_tailwind": {
-      "id": "external_tailwind",
+    "net_burn": {
+      "id": "net_burn",
       "type": "select",
-      "question": "What external tailwind is currently working in {{startup_name}}'s favour?",
+      "question": "¿Cuál es su net burn mensual promedio del último trimestre? (USD)",
       "required": true,
       "options": [
-        "Extreme Supply/Demand Imbalance: (e.g., severe labor shortages, energy crisis, or massive infrastructure gaps).",
-        "Generative AI / Large Scale Automation: (Enabling a 10x cost reduction or a new capability)",
-        "New Mandated Compliance/Reporting: (Companies are now legally forced to buy a solution like yours)",
-        "Platform Shift: (e.g. transition from legacy On-Premise to Cloud-native or Hardware to Software-defined)",
-        "None / General Market Growth: (Standard organic growth)."
+        "<10k €",
+        "10k-25k €",
+        "25k-50k €",
+        "50 - 100k €",
+        "+100k €"
       ],
-      "nextStep": "why_now_validation",
-      "attioField": "external_tailwind",
+      "nextStep": "organic_users",
+      "attioField": "net_burn_avg_monthly_4",
       "attioObject": "deals"
     },
 
-    "why_now_validation": {
-      "id": "why_now_validation",
-      "type": "textarea",
-      "question": "Why now? What has changed to allow {{startup_name}} to win where others couldn't?",
-      "placeholder": "The window of opportunity opens because...",
+    "organic_users": {
+      "id": "organic_users",
+      "type": "select",
+      "question": "¿Qué % de sus usuarios/clientes llegan orgánicamente (sin paid acquisition)?",
       "required": true,
-      "maxLength": 280,
-      "nextStep": "potential_clients",
-      "attioField": "why_now_validation",
+      "options": [
+        ">80% come via word-of-mouth, SEO, or organic loops.",
+        "50-80% organic, the rest is paid/outbound",
+        "<50% organic; we rely heavily on Ads/Sales teams."
+      ],
+      "nextStep": "churn",
+      "attioField": "organic_users",
       "attioObject": "deals"
     },
 
-    "potential_clients": {
-      "id": "potential_clients",
-      "type": "number",
-      "question": "How many potential customers are in your target market? (total number of companies or people)",
-      "placeholder": "10000",
-      "required": false,
+    "churn": {
+      "id": "churn",
+      "type": "select",
+      "question": "¿Cuál es su monthly churn?",
+      "required": true,
+      "options": [
+        "<2%",
+        "2-5%",
+        "5-10%",
+        ">10%",
+        "Not Applicable"
+      ],
       "nextStep": "acv",
-      "attioField": "potential_clients",
+      "attioField": "churn_avg_last_3_months",
       "attioObject": "deals"
     },
 
     "acv": {
       "id": "acv",
       "type": "number",
-      "question": "What is the ACV (Annual Contract Value) of your target customer? (in USD)",
+      "question": "¿Cuál es su ACV (Annual Contract Value)? En USD.",
       "placeholder": "12000",
       "required": false,
-      "nextStep": "icp",
+      "nextStep": "potential_clients",
       "attioField": "acv",
       "attioObject": "deals"
     },
 
-    "icp": {
-      "id": "icp",
-      "type": "textarea",
-      "question": "Describe your Ideal Customer Profile (ICP). Who are they, what problem do they have, and why do they buy from you?",
-      "placeholder": "Our ideal customer is...",
-      "required": true,
-      "maxLength": 280,
+    "potential_clients": {
+      "id": "potential_clients",
+      "type": "number",
+      "question": "¿Cuántos clientes potenciales hay en su TAM?",
+      "placeholder": "10000",
+      "required": false,
       "nextStep": "section_product",
-      "attioField": "icp",
+      "attioField": "potential_clients",
       "attioObject": "deals"
     },
 
     "section_product": {
       "id": "section_product",
       "type": "statement",
-      "question": "Great. Now let's talk about the product and defensibility.",
+      "question": "El pitch 🧠\n\nEl problema, la solución, el moat y por qué AHORA.\n\nEs el bloque más largo (~3 min) — pero también el que más nos cuenta de ustedes.",
       "nextStep": "problem"
     },
 
     "problem": {
       "id": "problem",
       "type": "textarea",
-      "question": "What is the core problem {{startup_name}} solves? Be specific.",
-      "placeholder": "The problem we solve is...",
+      "question": "¿Qué problema están resolviendo?",
+      "placeholder": "El problema que resolvemos es...",
       "required": true,
       "maxLength": 280,
-      "nextStep": "demo_url",
+      "nextStep": "icp",
       "attioField": "problem",
       "attioObject": "deals"
     },
 
-    "demo_url": {
-      "id": "demo_url",
-      "type": "url",
-      "question": "Do you have an online demo, video or product recording? Share the link if you have one.",
-      "placeholder": "https://demo.yourstartup.com",
+    "icp": {
+      "id": "icp",
+      "type": "textarea",
+      "question": "¿Quién es su ICP (Ideal Customer Profile)?",
+      "placeholder": "Nuestro cliente ideal es...",
+      "required": true,
+      "maxLength": 280,
+      "nextStep": "unique_solution",
+      "attioField": "icp",
+      "attioObject": "deals"
+    },
+
+    "unique_solution": {
+      "id": "unique_solution",
+      "type": "textarea",
+      "question": "¿Qué hace única a su solución vs. lo que ya existe?",
+      "placeholder": "Lo que nos diferencia es...",
+      "required": true,
+      "maxLength": 280,
+      "nextStep": "proprietary_data",
+      "attioField": "the_secret",
+      "attioObject": "deals"
+    },
+
+    "proprietary_data": {
+      "id": "proprietary_data",
+      "type": "textarea",
+      "question": "¿Tienen algún dataset propietario o data única? Cuéntanos.",
+      "placeholder": "Tenemos datos propietarios de...",
       "required": false,
       "nextStep": "defensibility",
-      "attioField": "demo",
+      "attioField": "uniqueness_ip",
       "attioObject": "deals"
     },
 
     "defensibility": {
       "id": "defensibility",
-      "type": "multiselect",
-      "question": "What moats protect {{startup_name}} against competitors? (Select all that apply)",
+      "type": "select",
+      "question": "¿Cuál es su principal defensibility / moat?",
       "required": false,
       "options": [
         "Data Moat",
@@ -491,30 +513,9 @@
 
     "third_party_dependance": {
       "id": "third_party_dependance",
-      "type": "select",
-      "question": "Do you have a critical dependency on any external provider (API, infrastructure, data...)?",
-      "required": true,
-      "options": [
-        "Independent: We use them for non-core tasks, but our 'magic' is ours.",
-        "Hybrid: We enhance 3rd party models with our own proprietary datasets/fine-tuning.",
-        "Dependent: We provide a superior layer/UX on top of existing powerful APIs."
-      ],
-      "conditions": [
-        {
-          "if": { "fieldId": "third_party_dependance", "operator": "equals", "value": "Independent: We use them for non-core tasks, but our 'magic' is ours." },
-          "then": "compliance"
-        }
-      ],
-      "nextStep": "third_party_mitigation",
-      "attioField": "uniqueness_ip",
-      "attioObject": "deals"
-    },
-
-    "third_party_mitigation": {
-      "id": "third_party_mitigation",
       "type": "textarea",
-      "question": "How do you manage that risk? What contingency plan do you have?",
-      "placeholder": "Our mitigation plan is...",
+      "question": "¿De qué terceros depende su producto? ¿Cómo mitigan ese riesgo?",
+      "placeholder": "Dependemos de... y lo mitigamos con...",
       "required": false,
       "nextStep": "compliance",
       "attioField": "third_party_mitigation",
@@ -524,7 +525,7 @@
     "compliance": {
       "id": "compliance",
       "type": "select",
-      "question": "How would you describe {{startup_name}}'s current regulatory compliance status?",
+      "question": "¿Cómo manejan compliance (GDPR / AI Act / PSD2 / HIPAA…)?",
       "required": true,
       "options": [
         "Formal policies, controls, and processes in place",
@@ -540,138 +541,76 @@
     "tech_stack": {
       "id": "tech_stack",
       "type": "textarea",
-      "question": "What is {{startup_name}}'s main tech stack?",
-      "placeholder": "e.g. Next.js, Python/FastAPI, PostgreSQL on AWS...",
+      "question": "¿Qué tech stack están usando?",
+      "placeholder": "ej. Next.js, Python/FastAPI, PostgreSQL en AWS...",
       "required": false,
-      "nextStep": "section_metrics",
+      "nextStep": "demo_url",
       "attioField": "tech_stack",
       "attioObject": "deals"
     },
 
-    "section_metrics": {
-      "id": "section_metrics",
-      "type": "statement",
-      "question": "Almost there! Now the numbers.\n\nBe honest — the Decelerators appreciate clarity over perfection. 📊",
-      "nextStep": "north_star"
-    },
-
-    "north_star": {
-      "id": "north_star",
-      "type": "textarea",
-      "question": "What is your North Star metric? Why that one, and what is the current value?",
-      "placeholder": "Our North Star is... and we're currently at...",
-      "required": true,
-      "nextStep": "mom_growth",
-      "attioField": "north_star",
-      "attioObject": "deals"
-    },
-
-    "mom_growth": {
-      "id": "mom_growth",
-      "type": "select",
-      "question": "What is your MoM (month-over-month) growth over the last 3 months?",
-      "required": true,
-      "options": [
-        ">20%",
-        "10-20%",
-        "5-10%",
-        "<5%",
-        "NA (building/pivoting)"
-      ],
-      "nextStep": "net_burn",
-      "attioField": "mom_growth",
-      "attioObject": "deals"
-    },
-
-    "net_burn": {
-      "id": "net_burn",
-      "type": "select",
-      "question": "What is your average monthly net burn?",
-      "required": true,
-      "options": [
-        "<10k €",
-        "10k-25k €",
-        "25k-50k €",
-        "50 - 100k €",
-        "+100k €"
-      ],
-      "nextStep": "churn",
-      "attioField": "net_burn_avg_monthly_4",
-      "attioObject": "deals"
-    },
-
-    "churn": {
-      "id": "churn",
-      "type": "select",
-      "question": "What is your average monthly churn rate over the last 3 months?",
-      "required": true,
-      "options": [
-        "<2%",
-        "2-5%",
-        "5-10%",
-        ">10%",
-        "Not Applicable"
-      ],
-      "nextStep": "organic_users",
-      "attioField": "churn_avg_last_3_months",
-      "attioObject": "deals"
-    },
-
-    "organic_users": {
-      "id": "organic_users",
-      "type": "select",
-      "question": "What percentage of your new users/customers arrive organically?",
-      "required": true,
-      "options": [
-        ">80% come via word-of-mouth, SEO, or organic loops.",
-        "50-80% organic, the rest is paid/outbound",
-        "<50% organic; we rely heavily on Ads/Sales teams."
-      ],
-      "nextStep": "unit_economics",
-      "attioField": "organic_users",
-      "attioObject": "deals"
-    },
-
-    "unit_economics": {
-      "id": "unit_economics",
-      "type": "multiselect",
-      "question": "Which of these statements describe your current situation? (Select all that apply)",
+    "demo_url": {
+      "id": "demo_url",
+      "type": "url",
+      "question": "Pásame un link al producto / demo 🎬",
+      "placeholder": "https://demo.tustartup.com",
       "required": false,
+      "nextStep": "deck_url",
+      "attioField": "demo",
+      "attioObject": "deals"
+    },
+
+    "deck_url": {
+      "id": "deck_url",
+      "type": "url",
+      "question": "Y el pitch deck también 📊",
+      "placeholder": "https://drive.google.com/...",
+      "required": false,
+      "nextStep": "why_now_select",
+      "attioField": "deck_url",
+      "attioObject": "deals"
+    },
+
+    "why_now_select": {
+      "id": "why_now_select",
+      "type": "select",
+      "question": "¿Por qué AHORA? ⏰",
+      "required": true,
       "options": [
-        "Unit Profitable (Payback < 1 month)",
-        "High Efficiency (LTV/CAC > 3x)",
-        "Gross Margin > 80%",
-        "Strategic Subsidy: We are intentionally losing money per user to capture the market/network effects.",
-        "Discovery Mode: We are still figuring out our pricing and acquisition costs."
+        "Extreme Supply/Demand Imbalance: (e.g., severe labor shortages, energy crisis, or massive infrastructure gaps).",
+        "Generative AI / Large Scale Automation: (Enabling a 10x cost reduction or a new capability)",
+        "New Mandated Compliance/Reporting: (Companies are now legally forced to buy a solution like yours)",
+        "Platform Shift: (e.g. transition from legacy On-Premise to Cloud-native or Hardware to Software-defined)",
+        "None / General Market Growth: (Standard organic growth)."
       ],
+      "nextStep": "why_now_validation",
+      "attioField": "external_tailwind",
+      "attioObject": "deals"
+    },
+
+    "why_now_validation": {
+      "id": "why_now_validation",
+      "type": "textarea",
+      "question": "Explícanos un poco más el «por qué ahora». Si pueden citar una ley, dato de mercado o cambio tech, mejor.",
+      "placeholder": "La ventana de oportunidad se abre porque...",
+      "required": true,
+      "maxLength": 280,
       "nextStep": "section_closure",
-      "attioField": "unit_economics",
+      "attioField": "why_now_validation",
       "attioObject": "deals"
     },
 
     "section_closure": {
       "id": "section_closure",
       "type": "statement",
-      "question": "Last section — our favourite questions 🙏\n\nJust a bit more and we're done.",
-      "nextStep": "soul_of_the_project"
-    },
-
-    "soul_of_the_project": {
-      "id": "soul_of_the_project",
-      "type": "textarea",
-      "question": "What is the soul of {{startup_name}}? Why does it exist, beyond the business?",
-      "placeholder": "We exist because...",
-      "required": true,
-      "maxLength": 280,
-      "nextStep": "how_did_you_find_us",
-      "attioField": "soul_of_the_project",
-      "attioObject": "deals"
+      "question": "¡Última parada! 🏁\n\nSolo nos queda saber cómo nos conociste.",
+      "nextStep": "how_did_you_find_us"
     },
 
     "how_did_you_find_us": {
       "id": "how_did_you_find_us",
       "type": "select",
-      "question": "How did you find out about us?",
+      "question": "¿Cómo nos conociste?",
       "required": true,
       "options": [
         "Referral",
@@ -688,7 +627,7 @@
           "then": "reference_explanation"
         }
       ],
-      "nextStep": "newsletter",
+      "nextStep": "network_contact",
       "attioField": "reference_3",
       "attioObject": "deals"
     },
@@ -696,23 +635,44 @@
     "reference_explanation": {
       "id": "reference_explanation",
       "type": "text",
-      "question": "Who referred you? (Name and company if possible)",
-      "placeholder": "e.g. María García from Rappi",
+      "question": "¿Quién te recomendó? (Nombre y empresa si es posible)",
+      "placeholder": "ej. María García de Rappi",
       "required": false,
-      "nextStep": "newsletter",
+      "nextStep": "network_contact",
       "attioField": "referral",
       "attioObject": "deals"
     },
 
-    "newsletter": {
-      "id": "newsletter",
-      "type": "select",
-      "question": "Would you like to receive our newsletter with exclusive content for founders?",
+    "network_contact": {
+      "id": "network_contact",
+      "type": "boolean",
+      "question": "¿Conoces a alguien del network de Decelera? (mentor, founder del portfolio, LP…)",
       "required": false,
-      "options": ["Yes", "No"],
-      "nextStep": null,
-      "attioField": "newsletter_4",
-      "attioObject": "deals"
+      "conditions": [
+        {
+          "if": { "fieldId": "network_contact", "operator": "equals", "value": "true" },
+          "then": "network_contact_name"
+        }
+      ],
+      "nextStep": "additional_comments"
+    },
+
+    "network_contact_name": {
+      "id": "network_contact_name",
+      "type": "text",
+      "question": "¿Quién es y cuál es tu relación con esa persona?",
+      "placeholder": "ej. Juan Pérez, mentor del programa 2024",
+      "required": false,
+      "nextStep": "additional_comments"
+    },
+
+    "additional_comments": {
+      "id": "additional_comments",
+      "type": "textarea",
+      "question": "¿Algún comentario adicional que quieras compartir?",
+      "placeholder": "Cualquier cosa que consideres relevante...",
+      "required": false,
+      "nextStep": null
     }
 
   }

@@ -4,7 +4,7 @@ import { startSession, submitAnswer, correctAnswer, getFlowStep, restartSession,
 import { ChatBubble, TypingIndicator } from './components/ChatBubble';
 import { Confetti } from './components/Confetti';
 import { StepInput } from './components/StepInput';
-import { ProgressBar } from './components/ProgressBar';
+import { Mascot } from './components/Mascot';
 
 interface Message {
   id: string;
@@ -31,31 +31,78 @@ const CORRECTION_SELECT_STEP: FlowStep = {
   required: true,
 };
 
-const INTRO_HTML = `Hi there! 👋 I'm the personal assistant to Carlota, Decelera's Dealflow Manager.<br>She's currently deep-diving into pitch decks and coffee, so she's asked me to help you with your application for <strong>Decelera Mexico 2026</strong> (May 22nd – 29th). 🏝️<br><br>Quick heads-up: we're a founder-first fund providing up to €1M in initial funding and a 7-day fully-sponsored residency to find our next startups. 🚀<br><br>Check our <a href="#" style="color:var(--color-sea);text-decoration:underline">FAQs</a> for details. Shall we start with the basics? It will just take a few minutes.<br><br>If at any point you submit the wrong answer, you'll have a chance to correct it at the end of the form.`;
+// ── Block definitions ────────────────────────────────────────────────────────
 
-const GDPR_HTML = `First things first, a quick note on your data 🔒<br><br><strong>Data Protection</strong><br><br>The information provided in this form will be managed under the "Decelera Mexico 2026 Form" in compliance with GDPR and applicable European data protection laws. You have the right to access, correct, delete, or object to the processing of your data. For more details, visit our <a href="#" style="color:var(--color-sea);text-decoration:underline">Privacy Policy</a>.`;
+const BLOCKS: { label: string; count: number }[] = [
+  { label: 'Sobre ti',   count: 8  },
+  { label: 'La startup', count: 7  },
+  { label: 'La ronda',   count: 5  },
+  { label: 'Tracción',   count: 7  },
+  { label: 'El pitch',   count: 12 },
+  { label: 'Cierre',     count: 5  },
+];
+
+const TOTAL_STEPS = BLOCKS.reduce((s, b) => s + b.count, 0); // 44
+
+const STEP_TO_BLOCK: Record<string, number> = {
+  section_about_you: 0, founder_first_name: 0, founder_last_name: 0,
+  founder_email: 0, founder_linkedin: 0, founder_nationality: 0,
+  number_of_founders: 0, technical_cofounder: 0, equity: 0,
+
+  section_company: 1, startup_name: 1, startup_website: 1,
+  constitution_location: 1, operations_location: 1, constitution_year: 1,
+  startup_sector: 1, business_model: 1,
+
+  section_round: 2, raising_amount: 2, round_stage: 2, raised_amount: 2,
+  pre_money_valuation: 2, runway: 2,
+
+  section_metrics: 3, north_star: 3, mom_growth: 3, net_burn: 3,
+  organic_users: 3, churn: 3, acv: 3, potential_clients: 3,
+
+  section_product: 4, problem: 4, icp: 4, unique_solution: 4,
+  proprietary_data: 4, defensibility: 4, third_party_dependance: 4,
+  compliance: 4, tech_stack: 4, demo_url: 4, deck_url: 4,
+  why_now_select: 4, why_now_validation: 4,
+
+  section_closure: 5, how_did_you_find_us: 5, reference_explanation: 5,
+  network_contact: 5, network_contact_name: 5, additional_comments: 5,
+};
+
+// ── Welcome copy ─────────────────────────────────────────────────────────────
+
+const INTRO_HTML = `¡Hola! Soy <strong>Paco</strong>, tu guía para la aplicación a <strong>Decelera LATAM 2026</strong> 🌎🚀<br><br>Somos un fondo founder-first — ofrecemos hasta <strong>$1M en initial funding</strong> y una <strong>residencia 100% sponsored de 7 días</strong> para encontrar nuestras próximas startups.<br><br>Esto te tomará unos <strong>11 minutos</strong>. Verás los 6 bloques en el panel lateral. Si en algún momento te equivocas, podrás corregirlo al final.`;
+
+const GDPR_HTML = `Antes de empezar, una nota sobre tus datos 🔒<br><br><strong>Protección de datos</strong><br><br>La información de este formulario se gestiona bajo el marco "Decelera LATAM 2026 Application" en cumplimiento del RGPD y las leyes de protección de datos aplicables. Tienes derecho a acceder, corregir, eliminar u oponerte al tratamiento de tus datos. Para más detalles, visita nuestra <a href="#" style="color:var(--color-sea);text-decoration:underline">Política de Privacidad</a>.`;
+
+// ── Main component ───────────────────────────────────────────────────────────
 
 export default function App() {
-  const [appState, setAppState] = useState<AppState>('loading');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [session, setSession] = useState<ApplicationSession | null>(null);
-  const [currentStep, setCurrentStep] = useState<FlowStep | null>(null);
-  const [isTyping, setIsTyping] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [totalSteps, setTotalSteps] = useState(10);
-  const [stepIndex, setStepIndex] = useState(0);
-  const [consentReady, setConsentReady] = useState(false);
-  const [answerHistory, setAnswerHistory] = useState<AnswerHistoryItem[]>([]);
-  const [correctionState, setCorrectionState] = useState<CorrectionState>('idle');
-  const [correctionStep, setCorrectionStep] = useState<FlowStep | null>(null);
-  const [correctionStepId, setCorrectionStepId] = useState<string | null>(null);
+  const [appState, setAppState]                   = useState<AppState>('loading');
+  const [messages, setMessages]                   = useState<Message[]>([]);
+  const [session, setSession]                     = useState<ApplicationSession | null>(null);
+  const [currentStep, setCurrentStep]             = useState<FlowStep | null>(null);
+  const [isTyping, setIsTyping]                   = useState(false);
+  const [isSubmitting, setIsSubmitting]           = useState(false);
+  const [consentReady, setConsentReady]           = useState(false);
+  const [answerHistory, setAnswerHistory]         = useState<AnswerHistoryItem[]>([]);
+  const [correctionState, setCorrectionState]     = useState<CorrectionState>('idle');
+  const [correctionStep, setCorrectionStep]       = useState<FlowStep | null>(null);
+  const [correctionStepId, setCorrectionStepId]   = useState<string | null>(null);
   const [confirmingRestart, setConfirmingRestart] = useState(false);
-  const [savedFlash, setSavedFlash] = useState(false);
-  const [inputKey, setInputKey] = useState(0);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [savedFlash, setSavedFlash]               = useState(false);
+  const [inputKey, setInputKey]                   = useState(0);
+  const bottomRef      = useRef<HTMLDivElement>(null);
   const isRestoringRef = useRef(false);
-  const initRan = useRef(false);
+  const initRan        = useRef(false);
 
+  // Derived: which block is currently active
+  const currentBlockIndex: number = (() => {
+    if (appState === 'complete') return BLOCKS.length;
+    if (!currentStep) return 0;
+    return STEP_TO_BLOCK[currentStep.id] ?? 0;
+  })();
+
+  // Prevent accidental navigation mid-form
   useEffect(() => {
     if (appState !== 'chat') return;
     const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); };
@@ -63,23 +110,19 @@ export default function App() {
     return () => window.removeEventListener('beforeunload', handler);
   }, [appState]);
 
+  // Scroll to bottom whenever messages or typing indicator change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: isRestoringRef.current ? 'instant' : 'smooth' });
     isRestoringRef.current = false;
   }, [messages, isTyping, consentReady]);
 
+  // Initialise session
   useEffect(() => {
     (async () => {
       if (initRan.current) return;
       initRan.current = true;
       try {
         const savedId = localStorage.getItem('decelera_session_id');
-
-        const flowRes = await fetch('/api/flow');
-        if (flowRes.ok) {
-          const flowData = await flowRes.json();
-          setTotalSteps(flowData.totalSteps ?? 10);
-        }
 
         if (savedId) {
           try {
@@ -93,17 +136,15 @@ export default function App() {
 
               type HistoryEntry = { stepId: string; question: string; answer: unknown; type: string };
               const restored: Message[] = [
-                { id: 'w-logo', type: 'bot', text: '', html: '<img src="/logo.svg" alt="Decelera Ventures" style="width:150px;display:block;margin:2px 0" />' },
                 { id: 'w-intro', type: 'bot', text: '', html: INTRO_HTML },
-                { id: 'w-gdpr', type: 'bot', text: '', html: GDPR_HTML },
+                { id: 'w-gdpr',  type: 'bot', text: '', html: GDPR_HTML  },
               ];
               for (const entry of (data.history ?? []) as HistoryEntry[]) {
                 restored.push({ id: `bot-${entry.stepId}`, type: 'bot', text: entry.question });
                 if (entry.type !== 'statement' && entry.answer !== null && entry.answer !== undefined) {
                   const display = Array.isArray(entry.answer)
                     ? (entry.answer as unknown[]).join(', ')
-                    : typeof entry.answer === 'boolean'
-                    ? (entry.answer ? 'Yes' : 'No')
+                    : typeof entry.answer === 'boolean' ? (entry.answer ? 'Sí' : 'No')
                     : String(entry.answer);
                   if (display) restored.push({ id: `user-${entry.stepId}`, type: 'user', text: display });
                 }
@@ -113,24 +154,23 @@ export default function App() {
                 .map((e: HistoryEntry) => {
                   const d = Array.isArray(e.answer)
                     ? (e.answer as unknown[]).join(', ')
-                    : typeof e.answer === 'boolean' ? (e.answer ? 'Yes' : 'No')
+                    : typeof e.answer === 'boolean' ? (e.answer ? 'Sí' : 'No')
                     : String(e.answer);
                   return { stepId: e.stepId, question: e.question, answer: e.answer, displayAnswer: d };
                 });
               const n = restoredHistory.length;
-              restored.push({ id: 'w-back', type: 'bot', text: `¡Bienvenido de nuevo! 👋 Tienes ${n} pregunta${n !== 1 ? 's' : ''} respondida${n !== 1 ? 's' : ''} — seguimos donde lo dejaste.` });
+              restored.push({ id: 'w-back', type: 'bot', text: `¡Bienvenido/a de nuevo! 👋 Tienes ${n} pregunta${n !== 1 ? 's' : ''} respondida${n !== 1 ? 's' : ''} — seguimos donde lo dejaste.` });
               restored.push({ id: 'bot-current', type: 'bot', text: data.step.question });
               isRestoringRef.current = true;
               setMessages(restored);
               setAnswerHistory(restoredHistory);
-              setStepIndex((data.history ?? []).length);
               setSession(data.session);
               setCurrentStep(data.step);
               setAppState('chat');
               return;
             }
           } catch {
-            // Fall through to new session
+            // fall through to new session
           }
         }
 
@@ -142,12 +182,8 @@ export default function App() {
         setIsTyping(true);
 
         await delay(700);
-        setMessages([{ id: 'w-logo', type: 'bot', text: '', html: '<img src="/logo.svg" alt="Decelera Ventures" style="width:150px;display:block;margin:2px 0" />' }]);
-
-        await delay(1200);
-        setMessages(prev => [...prev, { id: 'w-intro', type: 'bot', text: '', html: INTRO_HTML }]);
-
-        await delay(2800);
+        setMessages([{ id: 'w-intro', type: 'bot', text: '', html: INTRO_HTML }]);
+        await delay(2400);
         setMessages(prev => [...prev, { id: 'w-gdpr', type: 'bot', text: '', html: GDPR_HTML }]);
         setIsTyping(false);
         setConsentReady(true);
@@ -161,7 +197,6 @@ export default function App() {
   function addBotMessage(text: string) {
     setMessages(prev => [...prev, { id: `bot-${Date.now()}`, type: 'bot', text }]);
   }
-
   function addUserMessage(text: string) {
     setMessages(prev => [...prev, { id: `user-${Date.now()}`, type: 'user', text }]);
   }
@@ -191,7 +226,6 @@ export default function App() {
     try {
       const result = await restartSession(session!.id);
       setAnswerHistory([]);
-      setStepIndex(0);
       setCorrectionState('idle');
       setCorrectionStep(null);
       setCorrectionStepId(null);
@@ -229,8 +263,7 @@ export default function App() {
     setIsTyping(false);
     setMessages(prev => [...prev, {
       id: `bot-correct-${Date.now()}`,
-      type: 'bot',
-      text: '',
+      type: 'bot', text: '',
       html: `¿Qué respuesta quieres corregir?<br><br>${listHtml}<br><br>Escribe el número:`,
     }]);
     setCorrectionState('selecting');
@@ -239,7 +272,7 @@ export default function App() {
   async function handleAnswer(answer: unknown) {
     if (!session || isSubmitting) return;
 
-    // --- Correction: selecting a question ---
+    // Correction: selecting a question number
     if (correctionState === 'selecting') {
       const raw = String(answer).trim();
       addUserMessage(raw);
@@ -265,8 +298,7 @@ export default function App() {
       setIsTyping(false);
       setMessages(prev => [...prev, {
         id: `bot-correct-q-${Date.now()}`,
-        type: 'bot',
-        text: '',
+        type: 'bot', text: '',
         html: `${item.question}<br><br>Tu respuesta actual: <em>${item.displayAnswer}</em><br><br>¿Cuál es la correcta?`,
       }]);
       setCorrectionStep(step);
@@ -275,7 +307,7 @@ export default function App() {
       return;
     }
 
-    // --- Correction: submitting corrected answer ---
+    // Correction: submitting corrected answer
     if (correctionState === 'entering' && correctionStepId && correctionStep) {
       setIsSubmitting(true);
       const displayAnswer = formatAnswerForDisplay(answer, correctionStep);
@@ -306,7 +338,7 @@ export default function App() {
       return;
     }
 
-    // --- Free-form question: ends with ? or /ask [pregunta] → AI ---
+    // Free-form question / /ask command
     if (typeof answer === 'string') {
       const t = answer.trim();
       const isAskCmd = t.toLowerCase().startsWith('/ask ');
@@ -329,7 +361,7 @@ export default function App() {
       }
     }
 
-    // --- Normal flow: detect commands ---
+    // Slash commands
     if (typeof answer === 'string' && answer.trim().startsWith('/')) {
       const cmd = answer.trim().toLowerCase();
       addUserMessage(answer.trim());
@@ -381,6 +413,7 @@ export default function App() {
       return;
     }
 
+    // Normal answer submission
     if (!currentStep) return;
     setIsSubmitting(true);
 
@@ -390,7 +423,6 @@ export default function App() {
     try {
       const result = await submitAnswer(session.id, currentStep.id, answer);
       setSession(result.session);
-      setStepIndex(i => i + 1);
 
       setSavedFlash(true);
       setTimeout(() => setSavedFlash(false), 2000);
@@ -428,285 +460,335 @@ export default function App() {
     }
   }
 
+  // ── Render: loading / error ────────────────────────────────────────────────
+
   if (appState === 'loading') {
-    return <Screen><LoadingDots /></Screen>;
+    return (
+      <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+        <LoadingDots />
+      </div>
+    );
   }
 
   if (appState === 'error') {
     return (
-      <Screen>
+      <div style={{ height: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
         <div style={{ textAlign: 'center', color: 'var(--color-cloud)', fontFamily: 'var(--font-body)' }}>
           <p>No se pudo cargar el formulario.</p>
-          <p style={{ fontSize: 13 }}>Recarga la página o inténtalo más tarde.</p>
+          <p style={{ fontSize: 13, marginTop: 6 }}>Recarga la página o inténtalo más tarde.</p>
         </div>
-      </Screen>
+      </div>
     );
   }
 
-  return (
-    <Screen>
-      {/* Header */}
-      <div style={{
-        padding: '10px 16px', background: '#fff',
-        display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0,
-        boxShadow: '0 1px 4px rgba(45,56,82,0.08)', zIndex: 1,
-      }}>
-        <img
-          src="https://images.squarespace-cdn.com/content/v1/67811e8fe702fd5553c65249/c5500619-9712-4b9b-83ee-a697212735ae/Disen%CC%83o+sin+ti%CC%81tulo+%2840%29.png"
-          alt="Decelera"
-          style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
-        />
-        <div>
-          <div style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 15, color: 'var(--color-night)', lineHeight: 1.3 }}>
-            Decelera Ventures
-          </div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-cloud)', lineHeight: 1.3 }}>
-            {appState === 'complete' ? 'Aplicación enviada ✓' : 'Mexico 2026 · Aplicación'}
-          </div>
-        </div>
-        <div style={{ marginLeft: 'auto', marginRight: 6, display: 'flex', alignItems: 'center', gap: 14 }}>
-          <a
-            href="https://www.deceleraamericas.ventures/about-us"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: 'var(--color-cloud)', display: 'flex', alignItems: 'center' }}
-          >
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-            </svg>
-          </a>
-          <a
-            href="https://www.linkedin.com/company/decelera/posts/?feedView=all"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: 'var(--color-cloud)', display: 'flex', alignItems: 'center' }}
-          >
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-            </svg>
-          </a>
-        </div>
-      </div>
+  // Active step for the input (normal, correction-entering, or correction-selecting)
+  const activeStep =
+    correctionState === 'entering' && correctionStep ? correctionStep
+    : correctionState === 'selecting' ? CORRECTION_SELECT_STEP
+    : currentStep;
 
-      {/* Progress */}
-      {appState === 'chat' && (
-        <div style={{ padding: '12px 20px 0' }}>
-          <ProgressBar current={stepIndex} total={totalSteps} />
-          {savedFlash && (
-            <p style={{
-              textAlign: 'right', fontSize: 11, color: 'var(--color-water)',
-              fontFamily: 'var(--font-body)', marginTop: -10, paddingRight: 2,
-              animation: 'fadeSlideIn 0.2s ease-out',
-            }}>
-              ✓ Guardado
-            </p>
-          )}
-        </div>
-      )}
+  // ── Render: main layout ───────────────────────────────────────────────────
 
-      {/* Chat area */}
-      <div style={{
-        flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column',
-        backgroundImage: 'url(/bg-pattern.svg)',
-        backgroundSize: '480px 480px',
-      }}>
-        {messages.map((msg, i) => {
-          const isLast = i === messages.length - 1;
-          return msg.html ? (
-            <ChatBubble key={msg.id} type={msg.type} isNew={isLast}>
-              <div dangerouslySetInnerHTML={{ __html: msg.html }} />
-              {consentReady && isLast && (
-                <label style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  cursor: 'pointer', marginTop: 16,
-                  fontFamily: 'var(--font-body)', fontSize: 13,
-                  color: 'var(--color-cloud)', lineHeight: 1.5,
-                }}>
-                  <input
-                    type="checkbox"
-                    onChange={handleConsentChange}
-                    style={{ flexShrink: 0, accentColor: 'var(--color-sea)', width: 16, height: 16 }}
-                  />
-                  I have read and accept the data protection terms.
-                </label>
-              )}
-            </ChatBubble>
-          ) : (
-            <ChatBubble key={msg.id} message={msg.text} type={msg.type} isNew={isLast} />
-          );
-        })}
-        {isTyping && <TypingIndicator />}
-        <div ref={bottomRef} />
-      </div>
-
-      {/* Restart confirmation */}
-      {appState === 'chat' && confirmingRestart && (
-        <div style={{ padding: '8px 12px 16px', borderTop: '1px solid rgba(45,56,82,0.07)', flexShrink: 0, display: 'flex', gap: 10 }}>
-          <button
-            onClick={() => handleRestartConfirm(true)}
-            style={{
-              flex: 1, padding: '12px 0', borderRadius: 999, fontSize: 15,
-              fontFamily: 'var(--font-body)', cursor: 'pointer', border: 'none',
-              background: 'var(--color-night)', color: '#fff', fontWeight: 500,
-            }}
-          >
-            Sí, empezar de cero
-          </button>
-          <button
-            onClick={() => handleRestartConfirm(false)}
-            style={{
-              flex: 1, padding: '12px 0', borderRadius: 999, fontSize: 15,
-              fontFamily: 'var(--font-body)', cursor: 'pointer',
-              border: '1.5px solid rgba(45,56,82,0.12)', background: '#fff',
-              color: 'var(--color-night)',
-            }}
-          >
-            No, continuar
-          </button>
-        </div>
-      )}
-
-      {/* Input */}
-      {appState === 'chat' && !confirmingRestart && (() => {
-        const activeStep =
-          correctionState === 'entering' && correctionStep ? correctionStep
-          : correctionState === 'selecting' ? CORRECTION_SELECT_STEP
-          : currentStep;
-        return activeStep ? (
-          <div style={{ padding: '8px 12px 10px', borderTop: '1px solid rgba(45,56,82,0.07)', flexShrink: 0 }}>
-            <StepInput key={inputKey} step={activeStep} onSubmit={handleAnswer} disabled={isSubmitting || isTyping} />
-            {correctionState === 'idle' && answerHistory.length > 0 && (
-              <button
-                onClick={enterCorrectionMode}
-                disabled={isSubmitting || isTyping}
-                style={{
-                  display: 'block', margin: '8px auto 2px', background: 'none', border: 'none',
-                  fontSize: 12, color: 'var(--color-cloud)', cursor: 'pointer',
-                  fontFamily: 'var(--font-body)', opacity: 0.7,
-                }}
-              >
-                ✎ Editar una respuesta anterior
-              </button>
-            )}
-            <p style={{
-              textAlign: 'center', margin: '4px 0 0', fontSize: 11,
-              color: 'var(--color-cloud)', fontFamily: 'var(--font-body)', opacity: 0.85,
-            }}>
-              Escribe <code style={{ fontFamily: 'monospace' }}>/</code> para ver los comandos disponibles
-            </p>
-          </div>
-        ) : null;
-      })()}
-
-      {appState === 'complete' && (
-        <>
-          <Confetti />
-          <div style={{ padding: '16px 20px 24px', textAlign: 'center', flexShrink: 0 }}>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-cloud)' }}>
-              Breathe. Focus. Grow.
-            </span>
-          </div>
-        </>
-      )}
-
-      {appState === 'chat' && <CommandsPopup />}
-    </Screen>
-  );
-}
-
-// ---- Helpers ----
-
-function Screen({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{
-      height: '100dvh', display: 'flex', flexDirection: 'column',
-      background: '#F8F8F8', maxWidth: 640, margin: '0 auto',
-      position: 'relative',
-    }}>
-      {children}
-    </div>
-  );
-}
-
-const COMMAND_HINTS = [
-  { cmd: '/ask',     desc: 'Pregunta algo sobre Decelera' },
-  { cmd: '/correct', desc: 'Editar una respuesta' },
-  { cmd: '/restart', desc: 'Empezar de cero' },
-  { cmd: '/summary', desc: 'Ver resumen' },
-  { cmd: '/help',    desc: 'Ver ayuda' },
-];
-
-function CommandsPopup() {
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const seen = localStorage.getItem('decelera_commands_seen');
-    if (!seen) {
-      const t = setTimeout(() => setOpen(true), 2200);
-      return () => clearTimeout(t);
-    }
-  }, []);
-
-  function close() {
-    setOpen(false);
-    localStorage.setItem('decelera_commands_seen', '1');
-  }
+  // Sidebar palette (dark, Decelera brand)
+  const SB = {
+    bg:          '#1C2840',           // deep navy
+    divider:     'rgba(255,255,255,0.07)',
+    textDone:    'rgba(255,255,255,0.32)',
+    textPending: 'rgba(255,255,255,0.28)',
+    textCurrent: '#FFFFFF',
+    iconDone:    '#4ade80',           // green
+    accentBg:    'rgba(255,184,80,0.10)',   // sun-gold glow
+    accentBorder:'#FFB950',           // sun-gold
+    footerText:  'rgba(255,255,255,0.30)',
+    linkHover:   'rgba(255,255,255,0.55)',
+  } as const;
 
   return (
-    <div style={{ position: 'absolute', bottom: 92, right: 68, zIndex: 10 }}>
-      {open && (
-        <div style={{
-          position: 'absolute', bottom: 'calc(100% + 8px)', right: 0,
-          background: '#fff', borderRadius: 16,
-          boxShadow: '0 4px 24px rgba(45,56,82,0.14)',
-          padding: '14px 16px 12px', width: 226,
-          border: '1.5px solid rgba(45,56,82,0.08)',
-          animation: 'fadeSlideIn 0.25s cubic-bezier(0.34,1.4,0.64,1)',
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13, color: 'var(--color-night)' }}>
-              Comandos disponibles
-            </span>
-            <button onClick={close} style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--color-cloud)', fontSize: 18, lineHeight: 1, padding: '0 0 0 8px',
-            }}>×</button>
-          </div>
-          {COMMAND_HINTS.map(item => (
-            <div key={item.cmd} style={{ display: 'flex', gap: 8, alignItems: 'baseline', marginBottom: 7 }}>
-              <code style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-night)', fontFamily: 'monospace', minWidth: 68, flexShrink: 0 }}>{item.cmd}</code>
-              <span style={{ fontSize: 12, color: 'var(--color-cloud)', fontFamily: 'var(--font-body)' }}>{item.desc}</span>
-            </div>
-          ))}
-          <p style={{ fontSize: 11, color: 'var(--color-cloud)', fontFamily: 'var(--font-body)', marginTop: 8, marginBottom: 0, opacity: 0.7 }}>
-            Escribe <code style={{ fontFamily: 'monospace' }}>/</code> en el campo de texto para usarlos
-          </p>
-        </div>
-      )}
-      <button
-        onClick={() => setOpen(o => !o)}
+    <div style={{ display: 'flex', height: '100dvh', width: '100%' }}>
+
+      {/* ── Sidebar ─────────────────────────────────────────────────────── */}
+      <aside
+        className="app-sidebar"
         style={{
-          display: 'flex', alignItems: 'center', gap: 5,
-          background: open ? 'var(--color-night)' : '#fff',
-          color: open ? '#fff' : 'var(--color-night)',
-          border: '1.5px solid rgba(45,56,82,0.12)',
-          borderRadius: 999, padding: '6px 13px',
-          fontSize: 12, fontFamily: 'var(--font-body)', fontWeight: 500,
-          cursor: 'pointer', boxShadow: '0 2px 8px rgba(45,56,82,0.10)',
-          transition: 'background 0.15s, color 0.15s',
+          width: 232,
+          flexShrink: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          background: SB.bg,
+          overflowY: 'auto',
         }}
       >
-        <code style={{ fontSize: 13, fontFamily: 'monospace', lineHeight: 1 }}>/</code>
-        <span>Comandos</span>
-      </button>
+        {/* Brand header */}
+        <div style={{ padding: '22px 18px 16px', flexShrink: 0 }}>
+          <img
+            src="https://images.squarespace-cdn.com/content/v1/67811e8fe702fd5553c65249/c5500619-9712-4b9b-83ee-a697212735ae/Disen%CC%83o+sin+ti%CC%81tulo+%2840%29.png"
+            alt="Decelera"
+            style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', display: 'block', border: '2px solid rgba(255,255,255,0.12)' }}
+          />
+          {/* Taviraj for the brand wordmark */}
+          <div style={{ fontFamily: 'Taviraj, serif', fontWeight: 200, fontSize: 17, color: '#FFFFFF', marginTop: 12, letterSpacing: '0.01em', lineHeight: 1.15 }}>
+            Decelera Ventures
+          </div>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: SB.footerText, marginTop: 3, letterSpacing: '0.03em', textTransform: 'uppercase' }}>
+            {appState === 'complete' ? '✓ Aplicación enviada' : 'LATAM 2026'}
+          </div>
+        </div>
+
+        <div style={{ height: 1, background: SB.divider, margin: '0 18px 8px', flexShrink: 0 }} />
+
+        {/* Block list */}
+        <div style={{ flex: 1, padding: '4px 0 8px' }}>
+          {BLOCKS.map((block, idx) => {
+            const isDone    = appState === 'complete' || idx < currentBlockIndex;
+            const isCurrent = appState !== 'complete' && idx === currentBlockIndex;
+            const answered  = answerHistory.filter(a => STEP_TO_BLOCK[a.stepId] === idx).length;
+
+            return (
+              <div
+                key={idx}
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 10,
+                  padding: '9px 14px 9px 16px',
+                  marginBottom: 1,
+                  borderLeft: `3px solid ${isCurrent ? SB.accentBorder : 'transparent'}`,
+                  background: isCurrent ? SB.accentBg : 'transparent',
+                  transition: 'background 0.2s',
+                }}
+              >
+                {/* Status indicator */}
+                <div style={{
+                  width: 20, height: 20, borderRadius: '50%', flexShrink: 0, marginTop: 1,
+                  background: isDone ? SB.iconDone : isCurrent ? SB.accentBorder : 'transparent',
+                  border: (isDone || isCurrent) ? 'none' : `1.5px solid rgba(255,255,255,0.2)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {isDone ? (
+                    <svg width="9" height="9" viewBox="0 0 12 12" fill="none">
+                      <path d="M2.5 6l2.5 2.5 4.5-4.5" stroke="#1C2840" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  ) : !isCurrent ? (
+                    <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)', fontWeight: 500 }}>{idx + 1}</span>
+                  ) : null}
+                </div>
+
+                {/* Label + progress */}
+                <div>
+                  <div style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 13,
+                    fontWeight: isCurrent ? 500 : 400,
+                    color: isDone ? SB.textDone : isCurrent ? SB.textCurrent : SB.textPending,
+                    lineHeight: 1.4,
+                  }}>
+                    {block.label}
+                  </div>
+                  {isCurrent && (
+                    <div style={{ fontSize: 11, color: 'rgba(255,184,80,0.7)', marginTop: 2 }}>
+                      {answered} / {block.count} preguntas
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        <div style={{ padding: '14px 18px 20px', borderTop: `1px solid ${SB.divider}`, flexShrink: 0 }}>
+          {savedFlash && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#4ade80', fontFamily: 'var(--font-body)', marginBottom: 10, animation: 'fadeSlideIn 0.2s ease-out' }}>
+              ✓ Guardado
+            </div>
+          )}
+          <div style={{ fontSize: 11, color: SB.footerText, fontFamily: 'var(--font-body)', marginBottom: 12 }}>
+            {answerHistory.length} / {TOTAL_STEPS} preguntas respondidas
+          </div>
+
+          {/* Progress bar */}
+          <div style={{ height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden', marginBottom: 14 }}>
+            <div style={{
+              height: '100%',
+              width: `${Math.round((answerHistory.length / TOTAL_STEPS) * 100)}%`,
+              background: 'linear-gradient(90deg, #FFB950, #FF8C42)',
+              borderRadius: 2,
+              transition: 'width 0.4s ease',
+            }} />
+          </div>
+
+          <div style={{ display: 'flex', gap: 12 }}>
+            <a href="https://www.deceleraamericas.ventures/about-us" target="_blank" rel="noopener noreferrer"
+              style={{ color: SB.footerText, display: 'flex', alignItems: 'center', transition: 'color 0.15s' }}
+              onMouseEnter={e => (e.currentTarget.style.color = SB.linkHover)}
+              onMouseLeave={e => (e.currentTarget.style.color = SB.footerText)}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            </a>
+            <a href="https://www.linkedin.com/company/decelera/posts/?feedView=all" target="_blank" rel="noopener noreferrer"
+              style={{ color: SB.footerText, display: 'flex', alignItems: 'center', transition: 'color 0.15s' }}
+              onMouseEnter={e => (e.currentTarget.style.color = SB.linkHover)}
+              onMouseLeave={e => (e.currentTarget.style.color = SB.footerText)}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </aside>
+
+      {/* ── Main area ────────────────────────────────────────────────────── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, background: '#FAFAF9' }}>
+
+        {/* Mobile top bar (hidden on desktop via CSS) */}
+        <div
+          className="mobile-block-bar"
+          style={{
+            display: 'none',
+            alignItems: 'center',
+            gap: 10,
+            padding: '10px 16px',
+            borderBottom: '1px solid rgba(28,40,64,0.1)',
+            background: SB.bg,
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            {BLOCKS.map((_, idx) => {
+              const isDone    = appState === 'complete' || idx < currentBlockIndex;
+              const isCurrent = appState !== 'complete' && idx === currentBlockIndex;
+              return (
+                <div key={idx} style={{
+                  width: isCurrent ? 22 : 7, height: 7, borderRadius: 4,
+                  background: isDone ? '#4ade80' : isCurrent ? '#FFB950' : 'rgba(255,255,255,0.2)',
+                  transition: 'width 0.3s',
+                }} />
+              );
+            })}
+          </div>
+          {currentBlockIndex >= 0 && currentBlockIndex < BLOCKS.length && (
+            <span style={{ fontSize: 13, fontFamily: 'var(--font-body)', fontWeight: 500, color: '#fff' }}>
+              {BLOCKS[currentBlockIndex].label}
+            </span>
+          )}
+          <span style={{ marginLeft: 'auto', fontSize: 11, color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-body)' }}>
+            {answerHistory.length}/{TOTAL_STEPS}
+          </span>
+        </div>
+
+        {/* Messages */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 0 16px' }}>
+          <div style={{ maxWidth: 860, margin: '0 auto', padding: 'var(--chat-padding)', display: 'flex', gap: 'var(--chat-gap)', alignItems: 'flex-start' }}>
+
+            {/* Decelero — sticky, tamaño y posición por CSS variable */}
+            <div className="mascot-col" style={{ flexShrink: 0, position: 'sticky', bottom: '24px', alignSelf: 'flex-end' }}>
+              <Mascot size={96} animating={isTyping} />
+            </div>
+
+            {/* Columna de mensajes */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {messages.map((msg, i) => {
+                const isLast = i === messages.length - 1;
+                const prevMsg = messages[i - 1];
+                const showDivider = msg.type === 'bot' && prevMsg?.type === 'bot';
+                return (
+                <React.Fragment key={msg.id}>
+                  {showDivider && (
+                    <div style={{
+                      height: 1,
+                      background: 'rgba(45,56,82,0.08)',
+                      margin: '-12px 0 16px',
+                    }} />
+                  )}
+                  {msg.html ? (
+                  <ChatBubble type={msg.type} isNew={isLast}>
+                    <div dangerouslySetInnerHTML={{ __html: msg.html }} />
+                    {consentReady && isLast && (
+                      <label style={{
+                        display: 'flex', alignItems: 'flex-start', gap: 10,
+                        cursor: 'pointer', marginTop: 18, fontFamily: 'var(--font-body)',
+                        fontSize: 13, color: '#8896AE', lineHeight: 1.55,
+                      }}>
+                        <input
+                          type="checkbox"
+                          onChange={handleConsentChange}
+                          style={{ flexShrink: 0, accentColor: 'var(--color-sea)', width: 16, height: 16, marginTop: 2 }}
+                        />
+                        He leído y acepto los términos de protección de datos.
+                      </label>
+                    )}
+                  </ChatBubble>
+                  ) : (
+                    <ChatBubble message={msg.text} type={msg.type} isNew={isLast} />
+                  )}
+                </React.Fragment>
+                );
+              })}
+              {isTyping && <TypingIndicator />}
+              <div ref={bottomRef} />
+            </div>
+          </div>
+        </div>
+
+        {/* Input area */}
+        {appState === 'chat' && (
+          <div style={{
+            borderTop: '1px solid rgba(28,40,64,0.09)',
+            background: '#FFFFFF',
+            padding: '12px 0 16px',
+            flexShrink: 0,
+          }}>
+            <div style={{ maxWidth: 860, margin: '0 auto', padding: 'var(--input-padding)' }}>
+              {confirmingRestart ? (
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button
+                    onClick={() => handleRestartConfirm(true)}
+                    style={{ flex: 1, padding: '12px 0', borderRadius: 999, fontSize: 15, fontFamily: 'var(--font-body)', cursor: 'pointer', border: 'none', background: SB.bg, color: '#fff', fontWeight: 500 }}
+                  >
+                    Sí, empezar de cero
+                  </button>
+                  <button
+                    onClick={() => handleRestartConfirm(false)}
+                    style={{ flex: 1, padding: '12px 0', borderRadius: 999, fontSize: 15, fontFamily: 'var(--font-body)', cursor: 'pointer', border: '1.5px solid rgba(28,40,64,0.12)', background: '#fff', color: '#1a2133' }}
+                  >
+                    No, continuar
+                  </button>
+                </div>
+              ) : activeStep ? (
+                <>
+                  <StepInput key={inputKey} step={activeStep} onSubmit={handleAnswer} disabled={isSubmitting || isTyping} />
+                  <p style={{ textAlign: 'center', margin: '5px 0 0', fontSize: 11, color: '#B0BCCF', fontFamily: 'var(--font-body)' }}>
+                    Escribe <code style={{ fontFamily: 'monospace', fontSize: 11 }}>/</code> para ver los comandos
+                  </p>
+                </>
+              ) : null}
+            </div>
+          </div>
+        )}
+
+        {appState === 'complete' && (
+          <>
+            <Confetti />
+            <div style={{ padding: '20px 0 32px', textAlign: 'center', flexShrink: 0 }}>
+              <span style={{ fontFamily: 'Taviraj, serif', fontWeight: 200, fontSize: 18, color: '#8896AE', letterSpacing: '0.04em' }}>
+                Breathe. Focus. Grow.
+              </span>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function LoadingDots() {
   return (
-    <div style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+    <div style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }}>
       {[0, 1, 2].map((i) => (
         <span key={i} style={{
           width: 8, height: 8, borderRadius: '50%',
@@ -721,7 +803,7 @@ function LoadingDots() {
 function formatAnswerForDisplay(answer: unknown, step: FlowStep): string {
   if (answer === null || answer === undefined) return '';
   if (Array.isArray(answer)) return answer.join(', ');
-  if (typeof answer === 'boolean') return answer ? 'Yes' : 'No';
+  if (typeof answer === 'boolean') return answer ? 'Sí' : 'No';
   if (step.type === 'url' || step.type === 'email') return String(answer);
   return String(answer);
 }

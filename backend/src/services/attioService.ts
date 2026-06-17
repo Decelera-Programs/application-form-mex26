@@ -204,24 +204,20 @@ async function createDeal(input: DealInput): Promise<AttioResult<{ id: string }>
   // Founder
   addText('linkedin_1', a.founder_linkedin);
   addSelect('number_of_founders', a.number_of_founders);
-  addMultiSelect('collective_milestones', a.collective_milestones);
-  addSelect('experience_in_sector', a.experience_in_sector);
-  addText('relevant_experience_explanation', a.relevant_experience_explanation);
   addBool('full_time_cto', a.technical_cofounder);
 
   // Startup
   addText('deck_url', a.deck_url);
   addSelect('constitution_company', a.constitution_location);
   addNumber('constitution_year', a.constitution_year);
-  addMultiSelect('sector', a.startup_sector);
-  addMultiSelect('business_model', a.business_model);
+  addSelect('sector', a.startup_sector);
+  addSelect('business_model', a.business_model);
   addMultiSelect('operations_location', a.operations_location);
 
   // Problem / Product
   addText('problem', a.problem);
   addText('icp', a.icp);
-  addText('the_secret', a.the_secret);
-  addText('soul_of_the_project', a.soul_of_the_project);
+  addText('the_secret', a.unique_solution);
   addText('demo', a.demo_url);
   addText('tech_stack', a.tech_stack);
 
@@ -232,13 +228,11 @@ async function createDeal(input: DealInput): Promise<AttioResult<{ id: string }>
   addSelect('net_burn_avg_monthly_4', a.net_burn);
   addSelect('runway', a.runway);
   addSelect('organic_users', a.organic_users);
-  addMultiSelect('unit_economics', a.unit_economics);
-  addMultiSelect('most_significant_milestone_6', a.most_significant_milestone);
 
   // Fundraising
   addSelect('raised', a.raised_amount);
-  addNumber('raise', a.raising_amount);
-  addSelect('stage_round', a.stage_round);
+  addSelect('raise', a.raising_amount);
+  addSelect('stage_round', a.round_stage);
   addNumber('acv', a.acv);
   addNumber('potential_clients', a.potential_clients);
   addSelect('equity', a.equity);
@@ -246,18 +240,16 @@ async function createDeal(input: DealInput): Promise<AttioResult<{ id: string }>
     values['pre_money_valuation_7'] = [{ value: String(a.pre_money_valuation) }];
 
   // Defensibility / Why now
-  addMultiSelect('defensibility_4', a.defensibility);
-  addSelect('uniqueness_ip', a.third_party_dependance);
-  addText('third_party_mitigation', a.third_party_mitigation);
-  addSelect('external_tailwind', a.external_tailwind);
+  addSelect('defensibility_4', a.defensibility);
+  addText('uniqueness_ip', a.proprietary_data);
+  addText('third_party_mitigation', a.third_party_dependance);
+  addSelect('external_tailwind', a.why_now_select);
   addText('why_now_validation', a.why_now_validation);
 
   // Compliance & other
   addSelect('compliance_7', a.compliance);
-  addText('data_room', a.data_room);
   addSelect('reference_3', a.how_did_you_find_us);
   addText('referral', a.reference_explanation);
-  addSelect('newsletter_4', a.newsletter);
 
   const result = await attioFetch<{ data: { id: { record_id: string } } }>(
     '/objects/deals/records',
@@ -332,8 +324,12 @@ export async function syncSessionToAttio(
     return { ok: false, error: 'Missing founder email — cannot sync to Attio' };
   }
 
+  const firstName = String(answers.founder_first_name ?? '').trim();
+  const lastName = String(answers.founder_last_name ?? '').trim();
+  const fullName = [firstName, lastName].filter(Boolean).join(' ');
+
   const personResult = await upsertPerson({
-    fullName: String(answers.founder_name ?? '').trim(),
+    fullName: fullName || 'Unknown',
     email: String(answers.founder_email).trim().toLowerCase(),
     linkedin: answers.founder_linkedin ? String(answers.founder_linkedin) : undefined,
   });
