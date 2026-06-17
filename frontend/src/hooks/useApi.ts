@@ -62,6 +62,27 @@ export async function getFlowStep(stepId: string): Promise<FlowStep> {
   return res.json();
 }
 
+export interface ChatFormResponse {
+  isAnswer: boolean;
+  ackMessage: string;
+  extractedField?: string;
+  extractedValue?: unknown;
+  session?: ApplicationSession;
+  nextStep?: FlowStep | null;
+  isComplete?: boolean;
+  completionMessage?: string;
+}
+
+export async function chatFormAnswer(sessionId: string, message: string): Promise<ChatFormResponse> {
+  const res = await fetch(`${API_BASE}/sessions/${sessionId}/chat-answer`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message }),
+  });
+  if (!res.ok) throw new Error('Chat form answer failed');
+  return res.json();
+}
+
 export async function chatMessage(
   message: string,
   currentQuestion?: string,

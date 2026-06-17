@@ -52,3 +52,80 @@ CURRENT CONTEXT:
     ? block.text
     : 'No pude generar una respuesta. Continúa con el formulario cuando quieras.';
 }
+
+// ── AI-driven form extraction ─────────────────────────────────────────────────
+
+export interface ChatFormResult {
+  isAnswer: boolean;
+  extractedValue: unknown;
+  ackMessage: string;
+}
+
+export async function chatFormTurn(
+  userMessage: string,
+  field: { id: string; question: string; type: string; options?: string[] },
+  answers: Record<string, unknown>,
+  progress: { answered: number; total: number }
+): Promise<ChatFormResult> {
+  const optionsClause = field.options?.length
+    ? `\nAVAILABLE OPTIONS (extracted_value MUST be exactly one of): ${field.options.map(o => `"${o}"`).join(', ')}`
+    : '';
+
+  const typeHint = (() => {
+    switch (field.type) {
+      case 'boolean':     return '\nTYPE: Return true for yes/affirmative, false for no/negative.';
+      case 'number':      return '\nTYPE: Return only a plain number (no currency symbols, no units).';
+      case 'multiselect': return '\nTYPE: Return an array of strings from the available options.';
+      default:            return '';
+    }
+  })();
+
+  const recentContext = Object.entries(answers)
+    .slice(-5)
+    .map(([k, v]) => `  ${k}: ${JSON.stringify(v)}`)
+    .join('\n');
+
+  const system = `You are Paco, the application assistant for Decelera LATAM 2026 (a startup accelerator fund in Latin America).
+
+CURRENT FIELD:
+  id: ${field.id}
+  type: ${field.type}
+  question: "${field.question}"${optionsClause}${typeHint}
+
+RECENT ANSWERS:
+${recentContext || '  (none yet)'}
+
+Progress: ${progress.answered} / ${progress.total}
+
+INSTRUCTIONS:
+- If the user's message answers the current question: set is_answer=true, extract the value, write a warm 1-sentence acknowledgment in Spanish.
+- If unclear, unanswerable, or off-topic: set is_answer=false, write a brief clarification request in Spanish.
+- Keep responses SHORT. Plain text only — no markdown. Do NOT include the next question.
+
+Return ONLY this JSON (no other text):
+{"is_answer":true,"extracted_value":<value>,"ack_message":"<1 sentence in Spanish>"}
+OR
+{"is_answer":false,"extracted_value":null,"ack_message":"<clarification in Spanish>"}`;
+
+  const response = await client.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 250,
+    system,
+    messages: [{ role: 'user', content: userMessage }],
+  });
+
+  const text = response.content[0].type === 'text' ? response.content[0].text.trim() : '{}';
+
+  try {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('no json');
+    const parsed = JSON.parse(match[0]);
+    return {
+      isAnswer: Boolean(parsed.is_answer),
+      extractedValue: parsed.extracted_value ?? null,
+      ackMessage: String(parsed.ack_message ?? 'Entendido.'),
+    };
+  } catch {
+    return { isAnswer: false, extractedValue: null, ackMessage: '¿Puedes aclararlo un poco más?' };
+  }
+}

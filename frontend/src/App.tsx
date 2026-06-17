@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { FlowStep, ApplicationSession } from '../../shared/types';
-import { startSession, submitAnswer, correctAnswer, getFlowStep, restartSession, chatMessage } from './hooks/useApi';
+import { startSession, submitAnswer, correctAnswer, getFlowStep, restartSession, chatMessage, chatFormAnswer } from './hooks/useApi';
 import { ChatBubble, TypingIndicator } from './components/ChatBubble';
 import { Confetti } from './components/Confetti';
 import { StepInput } from './components/StepInput';
@@ -85,6 +85,7 @@ export default function App() {
   const [isSubmitting, setIsSubmitting]           = useState(false);
   const [consentReady, setConsentReady]           = useState(false);
   const [answerHistory, setAnswerHistory]         = useState<AnswerHistoryItem[]>([]);
+  const [aiMode, setAiMode]                       = useState(false);
   const [correctionState, setCorrectionState]     = useState<CorrectionState>('idle');
   const [correctionStep, setCorrectionStep]       = useState<FlowStep | null>(null);
   const [correctionStepId, setCorrectionStepId]   = useState<string | null>(null);
@@ -460,6 +461,74 @@ export default function App() {
     }
   }
 
+  async function handleAiMessage(text: string) {
+    const t = text.trim();
+    if (!t) return;
+    // Slash commands and direct questions still use the existing handler
+    if (t.startsWith('/') || t.endsWith('?')) return handleAnswer(t);
+    if (!session || !currentStep || isSubmitting) return;
+
+    setIsSubmitting(true);
+    addUserMessage(t);
+    setIsTyping(true);
+
+    try {
+      const result = await chatFormAnswer(session.id, t);
+
+      if (!result.isAnswer) {
+        await delay(400);
+        setIsTyping(false);
+        addBotMessage(result.ackMessage);
+        return;
+      }
+
+      // Show acknowledgment
+      await delay(400);
+      setIsTyping(false);
+      addBotMessage(result.ackMessage);
+
+      setSession(result.session!);
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 2000);
+
+      if (currentStep.type !== 'statement' && result.extractedValue !== null && result.extractedValue !== undefined) {
+        const displayAnswer = formatAnswerForDisplay(result.extractedValue, currentStep);
+        if (displayAnswer) {
+          setAnswerHistory(prev => [...prev, {
+            stepId: currentStep.id,
+            question: currentStep.question,
+            answer: result.extractedValue,
+            displayAnswer,
+          }]);
+        }
+      }
+
+      if (result.isComplete) {
+        setIsTyping(true);
+        await delay(typingDelay(result.completionMessage ?? ''));
+        setIsTyping(false);
+        addBotMessage(result.completionMessage ?? '');
+        setAppState('complete');
+        localStorage.removeItem('decelera_session_id');
+        return;
+      }
+
+      if (result.nextStep) {
+        setIsTyping(true);
+        await delay(typingDelay(result.nextStep.question));
+        setIsTyping(false);
+        setCurrentStep(result.nextStep);
+        addBotMessage(result.nextStep.question);
+      }
+    } catch {
+      setIsTyping(false);
+      addBotMessage('Algo salió mal. Por favor, inténtalo de nuevo.');
+    } finally {
+      setIsSubmitting(false);
+      setInputKey(k => k + 1);
+    }
+  }
+
   // ── Render: loading / error ────────────────────────────────────────────────
 
   if (appState === 'loading') {
@@ -759,10 +828,36 @@ export default function App() {
                 </div>
               ) : activeStep ? (
                 <>
-                  <StepInput key={inputKey} step={activeStep} onSubmit={handleAnswer} disabled={isSubmitting || isTyping} />
-                  <p style={{ textAlign: 'center', margin: '5px 0 0', fontSize: 11, color: '#B0BCCF', fontFamily: 'var(--font-body)' }}>
-                    Escribe <code style={{ fontFamily: 'monospace', fontSize: 11 }}>/</code> para ver los comandos
-                  </p>
+                  {aiMode
+                    ? <AiInput key={inputKey} onSubmit={handleAiMessage} disabled={isSubmitting || isTyping} />
+                    : <StepInput key={inputKey} step={activeStep} onSubmit={handleAnswer} disabled={isSubmitting || isTyping} />
+                  }
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
+                    <p style={{ margin: 0, fontSize: 11, color: '#B0BCCF', fontFamily: 'var(--font-body)' }}>
+                      {aiMode
+                        ? 'Modo IA — escribe con tus propias palabras'
+                        : <>Escribe <code style={{ fontFamily: 'monospace', fontSize: 11 }}>/</code> para ver los comandos</>
+                      }
+                    </p>
+                    <button
+                      onClick={() => setAiMode(m => !m)}
+                      title={aiMode ? 'Desactivar modo IA' : 'Activar modo IA (respuesta libre)'}
+                      style={{
+                        padding: '3px 10px',
+                        borderRadius: 999,
+                        border: `1.5px solid ${aiMode ? '#1C2840' : 'rgba(28,40,64,0.18)'}`,
+                        background: aiMode ? '#1C2840' : 'transparent',
+                        color: aiMode ? '#fff' : '#8896AE',
+                        fontSize: 11,
+                        fontFamily: 'var(--font-body)',
+                        cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: 4,
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      ✦ IA
+                    </button>
+                  </div>
                 </>
               ) : null}
             </div>
@@ -812,6 +907,71 @@ function LoadingDots() {
           animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
         }} />
       ))}
+    </div>
+  );
+}
+
+function AiInput({ onSubmit, disabled }: { onSubmit: (text: string) => void; disabled: boolean }) {
+  const [text, setText] = useState('');
+  const taRef = useRef<HTMLTextAreaElement>(null);
+
+  function submit() {
+    if (!text.trim() || disabled) return;
+    onSubmit(text.trim());
+    setText('');
+    if (taRef.current) taRef.current.style.height = 'auto';
+  }
+
+  function onKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); }
+  }
+
+  function onChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setText(e.target.value);
+    const ta = e.target;
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+  }
+
+  return (
+    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+      <textarea
+        ref={taRef}
+        value={text}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        disabled={disabled}
+        placeholder="Escribe tu respuesta libremente…"
+        rows={1}
+        style={{
+          flex: 1,
+          padding: '12px 16px',
+          borderRadius: 14,
+          border: '1.5px solid rgba(28,40,64,0.15)',
+          fontFamily: 'var(--font-body)',
+          fontSize: 'var(--chat-font)',
+          resize: 'none',
+          outline: 'none',
+          background: '#fff',
+          color: '#1a2133',
+          lineHeight: 1.5,
+          overflow: 'hidden',
+        }}
+      />
+      <button
+        onClick={submit}
+        disabled={disabled || !text.trim()}
+        style={{
+          width: 44, height: 44, borderRadius: '50%',
+          border: 'none', background: '#1C2840', color: '#fff',
+          cursor: 'pointer', flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/>
+        </svg>
+      </button>
     </div>
   );
 }

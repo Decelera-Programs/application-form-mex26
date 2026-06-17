@@ -3,7 +3,7 @@ import type { FlowConfig } from '../../../shared/types';
 import { createSession, getSession, updateSessionAnswer, updateAttioIds, patchSessionAnswer, resetSession } from '../services/sessionService';
 import { resolveNextStep, interpolateQuestion, getStep, buildHistory } from '../services/flowEngine';
 import { syncSessionToAttio } from '../services/attioService';
-import { askDecelera } from '../services/aiService';
+import { askDecelera, chatFormTurn } from '../services/aiService';
 
 // Load flow config — in production you might load from DB or file system
 import flowConfig from '../../../shared/flow-config.json';
@@ -188,6 +188,93 @@ router.post('/chat', async (req: Request, res: Response) => {
     res.json({ reply });
   } catch (err) {
     console.error('POST /chat error:', err);
+    res.status(500).json({ error: 'AI service unavailable' });
+  }
+});
+
+/**
+ * POST /sessions/:id/chat-answer
+ * AI mode: Claude extracts a structured answer from free-form text, then advances the session.
+ */
+router.post('/sessions/:id/chat-answer', async (req: Request, res: Response) => {
+  try {
+    const session = await getSession(req.params.id);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+    if (session.status === 'completed') {
+      return res.status(400).json({ error: 'Session already completed' });
+    }
+
+    const { message } = req.body as { message: string };
+    if (!message?.trim()) return res.status(400).json({ error: 'message required' });
+
+    const currentStep = getStep(flow, session.currentStepId);
+    if (!currentStep) return res.status(404).json({ error: 'Step not found' });
+
+    const totalDataFields = Object.values(flow.steps).filter(s => s.type !== 'statement').length;
+    const answeredCount   = Object.keys(session.answers).length;
+
+    const result = await chatFormTurn(
+      message.trim(),
+      {
+        id:       currentStep.id,
+        question: interpolateQuestion(currentStep.question, session.answers),
+        type:     currentStep.type,
+        options:  currentStep.options,
+      },
+      session.answers,
+      { answered: answeredCount, total: totalDataFields }
+    );
+
+    if (!result.isAnswer) {
+      return res.json({ isAnswer: false, ackMessage: result.ackMessage });
+    }
+
+    // Save answer and advance session
+    const updatedAnswers = { ...session.answers, [currentStep.id]: result.extractedValue };
+    let nextStepId       = resolveNextStep(currentStep, updatedAnswers);
+    let isComplete       = nextStepId === null;
+
+    let updatedSession = await updateSessionAnswer(
+      session.id,
+      currentStep.id,
+      result.extractedValue,
+      nextStepId,
+      isComplete
+    );
+
+    // Auto-advance through statement steps (section headers need no user input in AI mode)
+    let nextStep = nextStepId ? getStep(flow, nextStepId) : null;
+    while (nextStep?.type === 'statement') {
+      const afterId = resolveNextStep(nextStep, updatedAnswers);
+      updatedSession = await updateSessionAnswer(session.id, nextStep.id, null, afterId, afterId === null);
+      isComplete = afterId === null;
+      nextStepId = afterId;
+      nextStep   = afterId ? getStep(flow, afterId) : null;
+    }
+
+    if (isComplete) {
+      const attioResult = await syncSessionToAttio(updatedAnswers);
+      if (attioResult.ok) {
+        await updateAttioIds(session.id, attioResult.data.personId, attioResult.data.companyId, attioResult.data.dealId);
+      }
+    }
+
+    const interpolatedNextStep = nextStep
+      ? { ...nextStep, question: interpolateQuestion(nextStep.question, updatedAnswers) }
+      : null;
+
+    res.json({
+      isAnswer:         true,
+      ackMessage:       result.ackMessage,
+      extractedField:   currentStep.id,
+      extractedValue:   result.extractedValue,
+      session:          updatedSession,
+      nextStep:         interpolatedNextStep,
+      isComplete,
+      completionMessage: isComplete ? flow.completionMessage : undefined,
+    });
+  } catch (err) {
+    console.error('POST /sessions/:id/chat-answer error:', err);
     res.status(500).json({ error: 'AI service unavailable' });
   }
 });
