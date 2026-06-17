@@ -776,6 +776,22 @@ export default function App() {
               <span style={{ fontFamily: 'Taviraj, serif', fontWeight: 200, fontSize: 18, color: '#8896AE', letterSpacing: '0.04em' }}>
                 Breathe. Focus. Grow.
               </span>
+              <div style={{
+                margin: '24px auto 0',
+                maxWidth: 640,
+                borderRadius: 16,
+                overflow: 'hidden',
+                aspectRatio: '16/9',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
+              }}>
+                <iframe
+                  src="https://www.youtube.com/embed/Zkg_Av73SZ8"
+                  title="Decelera LATAM 2026"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                />
+              </div>
             </div>
           </>
         )}
